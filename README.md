@@ -25,9 +25,7 @@ The AI-Powered Personalized Learning Platform is designed to adapt educational c
 **Installation & Setup**
 
 - Prerequisites
-- 
 - Python 3.8+
-- 
 - Node.js 16+
 
 PostgreSQL or MongoDB
