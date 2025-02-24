@@ -27,7 +27,5 @@ The AI-Powered Personalized Learning Platform is designed to adapt educational c
 - Prerequisites
 - Python 3.8+
 - Node.js 16+
-
-PostgreSQL or MongoDB
-
-Virtual environment (optional)
+- PostgreSQL or MongoDB
+- Virtual environment (optional)
