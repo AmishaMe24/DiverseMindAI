@@ -6,31 +6,19 @@ The AI-Powered Personalized Learning Platform is designed to adapt educational c
 
 **Features**
 
+- AI powered teaching techniques including lesson plans, icebreakers and test crafted speically for dyslexic and dysclaculic students.
 - AI-Based Assessment: Analyzes students' cognitive profiles to personalize learning paths.
-- 
-- Adaptive Content Recommendation: Dynamically adjusts materials to suit individual learning styles (visual, auditory, interactive).
-- 
-- Gamification & Engagement: Uses game mechanics to enhance motivation and retention.
-- 
 - Real-Time Feedback & Progress Tracking: Helps teachers and parents monitor student growth.
-- 
-- Chatbot & AI Tutoring: Provides real-time assistance for student queries.
-- 
 - Accessibility Features: Supports text-to-speech, font customization, and dyslexia-friendly interfaces.
 
 
 **Technologies Used**
 
 - Backend: FastAPI / Flask
-- 
 - Frontend: React.js / Next.js
-- 
 - Database: PostgreSQL / MongoDB
-- 
 - AI Models: OpenAI Whisper, GPT-4, Custom NLP Models
-- 
 - Cloud & Deployment: AWS / GCP / Azure
-- 
 - Security & Compliance: HIPAA/GDPR-compliant architecture
 
 
