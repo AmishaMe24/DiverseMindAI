@@ -1,4 +1,9 @@
+import Homepage from "./components/Homepage"
+import Header from "./components/Header"
+
 const App = () => {
-  return <div className="text-3xl font-bold underline">Back</div>
+  return (
+  <><Header /><Homepage /></>
+  )
 }
 export default App
