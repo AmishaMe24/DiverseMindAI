@@ -1,10 +1,10 @@
-import React from "react";
-import { Button } from "./features/button";
-import { Card, CardContent } from "./features/card";
-import { motion } from "framer-motion";
-import { CheckCircle, Users, Star } from "lucide-react";
+import React from 'react'
+import { Button } from './features/button'
+import { Card, CardContent } from './features/card'
+import { motion } from 'framer-motion'
+import { CheckCircle, Users, Star } from 'lucide-react'
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 text-black-900">
       {/* Hero Section */}
@@ -86,24 +86,24 @@ export default function Home() {
         </div>
       </section>
     </div>
-  );
+  )
 }
 
 const features = [
   {
-    title: "Adaptive Lesson Plans",
-    description: "Personalized curriculum tailored for neurodiverse students.",
+    title: 'Adaptive Lesson Plans',
+    description: 'Personalized curriculum tailored for neurodiverse students.',
     icon: CheckCircle,
   },
   {
-    title: "Engaging Activities",
+    title: 'Engaging Activities',
     description:
-      "Interactive learning tools designed to enhance comprehension.",
+      'Interactive learning tools designed to enhance comprehension.',
     icon: Users,
   },
   {
-    title: "Proven Results",
-    description: "Backed by educational experts and real-world data.",
+    title: ' Validated Success',
+    description: 'Backed by educational experts and real-world data.',
     icon: Star,
   },
-];
+]
