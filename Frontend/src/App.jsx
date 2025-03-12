@@ -1,19 +1,28 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Signup from "./pages/SignUp";
-import Homepage from "./pages/HomePage";
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+} from 'react-router-dom'
+
+import Homepage from './pages/Homepage'
+import MainLayout from './layout/MainLayout'
+import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
+import NotfoundPage from './pages/NotfoundPage'
+const route = createBrowserRouter(
+  createRoutesFromElements(
+    /*parent route for MainLayput*/
+    <Route path="/" element={<MainLayout />}>
+      <Route index element={<Homepage />} />
+      <Route path="login" element={<LoginPage />} />
+      <Route path="signup" element={<SignupPage />} />
+      <Route path="*" element={<NotfoundPage />} />
+    </Route>
+  )
+)
 
 const App = () => {
-  return (
-  <Router>
-      <Routes>
-        <Route path="/" element={<Homepage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-      </Routes>
-    </Router>
-  )
+  return <RouterProvider router={route} />
 }
-export default App;
+export default App

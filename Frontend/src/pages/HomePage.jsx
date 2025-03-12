@@ -1,11 +1,10 @@
-import Header from "../components/Header";
-import Home from "../components/Home";
+import HomePage from '../components/Homepage'
 
-export default function HomePage() {
-    return (
-        <>
-        <Header></Header>
-        <Home></Home>
-        </>
-    );
+const Homepage = () => {
+  return (
+    <>
+      <HomePage />
+    </>
+  )
 }
+export default Homepage
