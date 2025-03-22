@@ -3,6 +3,7 @@ import { Button } from '../components/features/button'
 import { Card, CardContent } from '../components/features/card'
 import { motion } from 'framer-motion'
 import { CheckCircle, Users, Star } from 'lucide-react'
+import {Link} from 'react-router-dom'
 
 export default function HomePage() {
   return (
@@ -28,12 +29,16 @@ export default function HomePage() {
           <p className="text-xl mb-6 text-black-900 font-bold  mx-auto">
             Empowering learners with AI-driven, adaptive STEM education.
           </p>
-          <Button
-            size="lg"
-            className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-xl hover:bg-blue-700"
-          >
-            Get Started
-          </Button>
+          <Link to="/lesson-plan">
+  <Button
+    size="lg"
+    className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-xl hover:bg-blue-700"
+  >
+    Get Started
+  </Button>
+</Link>
+
+          
         </div>
       </section>
 
