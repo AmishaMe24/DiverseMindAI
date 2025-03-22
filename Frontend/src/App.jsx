@@ -11,7 +11,6 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import NotfoundPage from './pages/NotfoundPage'
 import Dashboard from './pages/Dashboard'
-import Sidebar from './pages/Sidebar'
 
 const route = createBrowserRouter(
   createRoutesFromElements(
@@ -21,7 +20,6 @@ const route = createBrowserRouter(
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />
       <Route path="dashboard" element={<Dashboard />} />
-      <Route path="sidebar" element={<Sidebar />} />
       <Route path="*" element={<NotfoundPage />} />
     </Route>
   )
