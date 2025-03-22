@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom"; // Added missing import
 
 const Sidebar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -55,9 +56,11 @@ const Sidebar = () => {
                   className="h-8 me-3"
                   alt="Logo"
                 />
+                <Link to="/">
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
                   DiverseMind
                 </span>
+                </Link>
               </a>
             </div>
 
@@ -79,7 +82,7 @@ const Sidebar = () => {
 
                 {/* Dropdown */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 top-9.5 mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm z-50">
+                  <div className="absolute right-0 top-full mt-2 w-48 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm z-50">
                     <div className="px-4 py-3">
                       <p className="text-sm text-gray-900">Neil Sims</p>
                       <p className="text-sm font-medium text-gray-900 truncate">
@@ -120,138 +123,152 @@ const Sidebar = () => {
         </div>
       </nav>
 
-      SIDEBAR
+      {/* SIDEBAR */}
       <aside
-  className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform ${
-    isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-  } bg-white border-r border-gray-200 sm:translate-x-0 shadow-md`}
-  aria-label="Sidebar"
->
-  <div className="h-full px-4 pb-6 overflow-y-auto bg-white flex flex-col justify-between">
-    <ul className="space-y-3 font-medium">
+        className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } bg-white border-r border-gray-200 sm:translate-x-0 shadow-md`}
+        aria-label="Sidebar"
+      >
+        <div className="h-full px-4 pb-6 overflow-y-auto bg-white flex flex-col justify-between">
+          <ul className="space-y-3 font-medium">
+            {/* Homepage */}
+            <li>
+              <Link
+                to="/"
+                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+              >
+                <svg 
+                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                  Homepage
+                </span>
+              </Link>
+            </li>
 
-      {/* Homepage */}
-      <li>
-        <a
-          href="#"
-          className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
-        >
-          <svg
-            className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-7-7v18" />
-          </svg>
-          <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
-            Homepage
-          </span>
-        </a>
-      </li>
+            {/* Lesson Plan */}
+            <li>
+              <Link
+                to="/lesson-plan"
+                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+              >
+                <svg 
+                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                  Lesson Plan
+                </span>
+              </Link>
+            </li>
 
-      {/* Lesson Plan */}
-      <li>
-        <a
-          href="#"
-          className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
-        >
-          <svg
-            className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v18l7-4 7 4V3H5z" />
-          </svg>
-          <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
-            Lesson Plan
-          </span>
-        </a>
-      </li>
+            {/* Quiz Maker */}
+            <li>
+              <Link
+                to="/quiz-maker"
+                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+              >
+                <svg 
+                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                  Quiz Maker
+                </span>
+              </Link>
+            </li>
 
-      {/* Quiz Maker */}
-      <li>
-        <a
-          href="#"
-          className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
-        >
-          <svg
-            className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 01-8 0m8 0a4 4 0 00-8 0m8 0v1a4 4 0 11-8 0v-1" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 14v7" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 18h6" />
-          </svg>
-          <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
-            Quiz Maker
-          </span>
-        </a>
-      </li>
+            {/* Ice Breaker Activities */}
+            <li>
+              <Link
+                to="/ice-breaker"
+                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+              >
+                <svg 
+                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                  Ice Breaker Activities
+                </span>
+              </Link>
+            </li>
 
-      {/* Ice Breaker Activities */}
-      <li>
-        <a
-          href="#"
-          className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
-        >
-          <svg
-            className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 12l4-4 4 4m0 0l-4 4-4-4" />
-          </svg>
-          <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
-            Ice Breaker Activities
-          </span>
-        </a>
-      </li>
+            {/* Feedback System */}
+            <li>
+              <Link
+                to="/feedback"
+                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+              >
+                <svg 
+                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                </svg>
+                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                  Feedback System
+                </span>
+              </Link>
+            </li>
+          </ul>
 
-      {/* Feedback System */}
-      <li>
-        <a
-          href="#"
-          className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
-        >
-          <svg
-            className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8h2a2 2 0 012 2v9l-4-4H7a2 2 0 01-2-2V8a2 2 0 012-2h2" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6M15 3l-3 3m3-3l3 3" />
-          </svg>
-          <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
-            Feedback System
-          </span>
-        </a>
-      </li>
-    </ul>
+          {/* Footer / CTA */}
+          <div className="mt-8 px-3">
+            <div className="bg-blue-100 rounded-xl p-4 text-center">
+              <p className="text-sm text-blue-800 font-medium">
+                Empowering Neurodiverse Learning ✨
+              </p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+};
 
-    {/* Footer / CTA */}
-    <div className="mt-8 px-3">
-      <div className="bg-blue-100 rounded-xl p-4 text-center">
-        <p className="text-sm text-blue-800 font-medium">
-          Empowering Neurodiverse Learning ✨
-        </p>
-      </div>
-    </div>
-  </div>
-</aside>
-
-        </>
-    );
-    };
-
-    export default Sidebar;
+export default Sidebar;

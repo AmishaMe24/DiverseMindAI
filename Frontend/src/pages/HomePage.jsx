@@ -32,7 +32,7 @@ export default function HomePage() {
           <Link to="/lesson-plan">
   <Button
     size="lg"
-    className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-xl hover:bg-blue-700"
+    className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-xl hover:bg-blue-700 cursor-pointer"
   >
     Get Started
   </Button>
