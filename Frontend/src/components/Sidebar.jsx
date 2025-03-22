@@ -1,27 +1,27 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom"; // Added missing import
+import React, { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom' // Added missing import
 
 const Sidebar = () => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const dropdownRef = useRef(null)
 
   // Toggle dropdown
-  const toggleDropdown = () => setIsDropdownOpen((prev) => !prev);
+  const toggleDropdown = () => setIsDropdownOpen((prev) => !prev)
 
   // Toggle sidebar
-  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
+  const toggleSidebar = () => setIsSidebarOpen((prev) => !prev)
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsDropdownOpen(false);
+        setIsDropdownOpen(false)
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <>
@@ -52,21 +52,24 @@ const Sidebar = () => {
               </button>
               <a href="#" className="flex ms-2 md:me-24">
                 <img
-                  src="https://flowbite.com/docs/images/logo.svg"
+                  src="/src/assets/diversemind-logo.jpg"
                   className="h-8 me-3"
                   alt="Logo"
                 />
                 <Link to="/">
-                <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
-                  DiverseMind
-                </span>
+                  <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap">
+                    DiverseMind
+                  </span>
                 </Link>
               </a>
             </div>
 
             {/* User Avatar */}
             <div className="flex items-center">
-              <div className="flex items-center ms-3 relative" ref={dropdownRef}>
+              <div
+                className="flex items-center ms-3 relative"
+                ref={dropdownRef}
+              >
                 <button
                   type="button"
                   onClick={toggleDropdown}
@@ -126,7 +129,7 @@ const Sidebar = () => {
       {/* SIDEBAR */}
       <aside
         className={`fixed top-0 left-0 z-40 w-64 h-screen pt-20 transition-transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } bg-white border-r border-gray-200 sm:translate-x-0 shadow-md`}
         aria-label="Sidebar"
       >
@@ -138,14 +141,14 @@ const Sidebar = () => {
                 to="/"
                 className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
               >
-                <svg 
+                <svg
                   className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -163,14 +166,14 @@ const Sidebar = () => {
                 to="/lesson-plan"
                 className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
               >
-                <svg 
+                <svg
                   className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -188,14 +191,14 @@ const Sidebar = () => {
                 to="/quiz-maker"
                 className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
               >
-                <svg 
+                <svg
                   className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <circle cx="12" cy="12" r="10"></circle>
@@ -214,14 +217,14 @@ const Sidebar = () => {
                 to="/ice-breaker"
                 className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
               >
-                <svg 
+                <svg
                   className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -238,14 +241,14 @@ const Sidebar = () => {
                 to="/feedback"
                 className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
               >
-                <svg 
+                <svg
                   className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
@@ -268,7 +271,7 @@ const Sidebar = () => {
         </div>
       </aside>
     </>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar
