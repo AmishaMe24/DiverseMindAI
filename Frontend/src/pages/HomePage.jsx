@@ -23,11 +23,10 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            AI-Powered Learning for Neurodiverse Students
+            Revolutionizing STEM Education with AI
           </motion.h1>
           <p className="text-xl mb-6 text-black-900 font-bold  mx-auto">
-            A revolutionary platform that tailors STEM education for students
-            with Dyscalculia and Dyslexia.
+            Empowering learners with AI-driven, adaptive STEM education.
           </p>
           <Button
             size="lg"
