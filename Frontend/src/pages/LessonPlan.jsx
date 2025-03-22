@@ -107,8 +107,8 @@ export default function LessonPlan() {
   );
 
   return (
-    <div className="p-8 mt-8 flex justify-center">
-      <div className="w-full ml-[13%] bg-white rounded-2xl shadow-lg p-8">
+    <div className="p-4 mt-7 flex justify-center">
+      <div className="w-full ml-[14%] bg-white rounded-2xl shadow-lg p-8">
         <h1 className="text-4xl font-bold mb-10 text-gray-800 text-center">
           Lesson Plan Generator
         </h1>

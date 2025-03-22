@@ -21,18 +21,24 @@ export default function Header() {
           {/* Right side container with nav items and buttons */}
           <div className="flex items-center">
             <div className="hidden lg:flex mr-10">
-              <ul className="flex flex-row space-x-8 font-medium">
-                {['Home', 'Features', 'Team', 'Contact'].map((item, index) => (
-                  <li key={index}>
-                    <Link
-                      to="/"
-                      className="block py-2 text-gray-700 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-600 lg:p-0"
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            <ul className="flex flex-row space-x-8 font-medium">
+  {['Home', 'Features', 'Team', 'Contact'].map((item, index) => (
+    <li key={index}>
+      <Link
+        to={
+          item === "Home"
+            ? "/"
+            : item === "Features"
+            ? "/lesson-plan"
+            : `/${item.toLowerCase()}`
+        }
+        className="block py-2 text-gray-700 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-600 lg:p-0"
+      >
+        {item}
+      </Link>
+    </li>
+  ))}
+</ul>
             </div>
 
             {/* Login, Sign Up, Get Started */}
