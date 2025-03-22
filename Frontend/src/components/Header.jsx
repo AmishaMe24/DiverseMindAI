@@ -1,19 +1,20 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+
 export default function Header() {
   return (
     <header>
-      <nav className="bg-white shadow-md px-4 lg:px-6 py-3">
+      <nav className="bg-white border-gray-200 px-4 lg:px-6 py-2.5">
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
-          {/* Logo  */}
+          {/* Logo */}
           <Link to="/" className="flex items-center">
             <img
               src="/src/assets/diversemind-logo.jpg"
               className="mr-3 h-6 sm:h-9 rounded-full"
               alt="Diversemind Logo"
             />
-            <span className="self-center text-xl font-semibold whitespace-nowrap text-gray-900">
-              Diversemind
+            <span className="self-center text-xl font-semibold whitespace-nowrap">
+              DiverseMind
             </span>
           </Link>
 
@@ -34,7 +35,7 @@ export default function Header() {
               </ul>
             </div>
 
-            {/* Login and signup buttons */}
+            {/* Login, Sign Up, Get Started */}
             <div className="flex items-center">
               <Link
                 to="/login"
