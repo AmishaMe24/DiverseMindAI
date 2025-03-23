@@ -1,10 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom' // Added missing import
+import { Link, useLocation } from 'react-router-dom' // Added useLocation hook
 
 const Sidebar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const dropdownRef = useRef(null)
+  const location = useLocation() // Get current location
+  
+  // Check if a route is active
+  const isActive = (path) => {
+    return location.pathname === path
+  }
 
   // Toggle dropdown
   const toggleDropdown = () => setIsDropdownOpen((prev) => !prev)
@@ -139,10 +145,16 @@ const Sidebar = () => {
             <li>
               <Link
                 to="/"
-                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+                className={`group flex items-center p-3 rounded-xl transition ${
+                  isActive('/') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'hover:bg-blue-50'
+                }`}
               >
                 <svg
-                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  className={`w-5 h-5 transition ${
+                    isActive('/') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
+                  }`}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -154,7 +166,9 @@ const Sidebar = () => {
                   <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                   <polyline points="9 22 9 12 15 12 15 22"></polyline>
                 </svg>
-                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                <span className={`ms-4 font-semibold ${
+                  isActive('/') ? 'text-blue-700' : 'text-gray-900 group-hover:text-blue-600'
+                }`}>
                   Homepage
                 </span>
               </Link>
@@ -164,10 +178,16 @@ const Sidebar = () => {
             <li>
               <Link
                 to="/lesson-plan"
-                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+                className={`group flex items-center p-3 rounded-xl transition ${
+                  isActive('/lesson-plan') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'hover:bg-blue-50'
+                }`}
               >
                 <svg
-                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  className={`w-5 h-5 transition ${
+                    isActive('/lesson-plan') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
+                  }`}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -179,7 +199,9 @@ const Sidebar = () => {
                   <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                   <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                 </svg>
-                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                <span className={`ms-4 font-semibold ${
+                  isActive('/lesson-plan') ? 'text-blue-700' : 'text-gray-900 group-hover:text-blue-600'
+                }`}>
                   Lesson Plan
                 </span>
               </Link>
@@ -189,10 +211,16 @@ const Sidebar = () => {
             <li>
               <Link
                 to="/quiz-maker"
-                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+                className={`group flex items-center p-3 rounded-xl transition ${
+                  isActive('/quiz-maker') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'hover:bg-blue-50'
+                }`}
               >
                 <svg
-                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  className={`w-5 h-5 transition ${
+                    isActive('/quiz-maker') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
+                  }`}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -205,7 +233,9 @@ const Sidebar = () => {
                   <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                   <line x1="12" y1="17" x2="12.01" y2="17"></line>
                 </svg>
-                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                <span className={`ms-4 font-semibold ${
+                  isActive('/quiz-maker') ? 'text-blue-700' : 'text-gray-900 group-hover:text-blue-600'
+                }`}>
                   Quiz Maker
                 </span>
               </Link>
@@ -215,10 +245,16 @@ const Sidebar = () => {
             <li>
               <Link
                 to="/ice-breaker"
-                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+                className={`group flex items-center p-3 rounded-xl transition ${
+                  isActive('/ice-breaker') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'hover:bg-blue-50'
+                }`}
               >
                 <svg
-                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  className={`w-5 h-5 transition ${
+                    isActive('/ice-breaker') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
+                  }`}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -229,7 +265,9 @@ const Sidebar = () => {
                 >
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
-                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                <span className={`ms-4 font-semibold ${
+                  isActive('/ice-breaker') ? 'text-blue-700' : 'text-gray-900 group-hover:text-blue-600'
+                }`}>
                   Ice Breaker Activities
                 </span>
               </Link>
@@ -239,10 +277,16 @@ const Sidebar = () => {
             <li>
               <Link
                 to="/feedback"
-                className="group flex items-center p-3 rounded-xl transition hover:bg-blue-50"
+                className={`group flex items-center p-3 rounded-xl transition ${
+                  isActive('/feedback') 
+                    ? 'bg-blue-100 text-blue-700' 
+                    : 'hover:bg-blue-50'
+                }`}
               >
                 <svg
-                  className="w-5 h-5 text-gray-500 group-hover:text-blue-600 transition"
+                  className={`w-5 h-5 transition ${
+                    isActive('/feedback') ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
+                  }`}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -253,7 +297,9 @@ const Sidebar = () => {
                 >
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
                 </svg>
-                <span className="ms-4 text-gray-900 group-hover:text-blue-600 font-semibold">
+                <span className={`ms-4 font-semibold ${
+                  isActive('/feedback') ? 'text-blue-700' : 'text-gray-900 group-hover:text-blue-600'
+                }`}>
                   Feedback System
                 </span>
               </Link>
