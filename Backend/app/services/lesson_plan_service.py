@@ -88,17 +88,17 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     lesson_collection, exec_collection = get_context(client)
     # Get lesson chunks
     lesson_results = lesson_collection.query(
-    query_texts=[f"{topic} in {subject} for grade {grade}"],  # semantic hint
-    n_results=5,
-    where={
-        "$and": [
-            {"grade": str(grade).strip()},
-            {"subject": subject.strip()},
-            {"topic": topic.strip()}
-        ]
-    },
-    include=["documents", "metadatas"]
-)
+        query_texts=[f"{topic} in {subject} for grade {grade}"],  # semantic hint
+        n_results=5,
+        where={
+            "$and": [
+                {"grade": str(grade).strip()},
+                {"subject": subject.strip()},
+                {"topic": topic.strip()}
+            ]
+        },
+        include=["documents", "metadatas"]
+    )
 
     print(f'lesson  results--------------------------------------------------------------:\n{lesson_results}')
     
