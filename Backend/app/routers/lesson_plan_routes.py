@@ -22,7 +22,7 @@ class LessonPlanResponse(BaseModel):
     lessonName: str
     gradeLevel: str
     concept: str
-    examples: List[Dict[str, Any]]
+    lessonPlan: str
 
 @router.post("", response_model=LessonPlanResponse, status_code=status.HTTP_200_OK)
 async def get_lesson_plan(request: LessonPlanRequest):
@@ -61,7 +61,14 @@ async def get_lesson_plan(request: LessonPlanRequest):
             )
 
         # Wrap the response into a structure your frontend expects
-        response = rag_text
+        response = {
+            "title": "Adaptive Math Lesson Plan",
+            "lessonName": f"Math Lesson: {topic}",
+            "gradeLevel": f"Grade {grade}",
+            "concept": topic,
+            "lessonPlan": rag_text,  # The raw text from your LLM
+            "examples": []  # Empty array for now
+        }
         
 
         return response

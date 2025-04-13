@@ -1,17 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 export default function LessonPlan() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [hoveredOption, setHoveredOption] = useState(null);
   const [showOutput, setShowOutput] = useState(false);
   const dropdownRef = useRef({});
-
-  // State for form data
-  const [formData, setFormData] = useState({
-    additionalInfo: "",
-    prompt: ""
-  });
 
   // State for API response and loading/error states
   const [lessonPlan, setLessonPlan] = useState(null);
@@ -56,9 +51,7 @@ export default function LessonPlan() {
         { label: "5th Grade", value: "5th_grade" },
         { label: "6th Grade", value: "6th_grade" },
         { label: "7th Grade", value: "7th_grade" },
-        { label: "8th Grade", value: "8th_grade" },
-        { label: "9th Grade", value: "9th_grade" },
-        { label: "10th Grade", value: "10th_grade" }
+        { label: "8th Grade", value: "8th_grade" }
       ]
     }
   };
@@ -97,19 +90,10 @@ export default function LessonPlan() {
     setOpenDropdown(null);
   };
 
-  // Handle text inputs
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
-
   // Handle form submission
   const handleSubmit = async () => {
     // Validate form data
-    if (!selected.disorder || !selected.topic || !selected.grade || !formData.prompt) {
+    if (!selected.disorder || !selected.topic || !selected.grade) {
       setError("Please fill in all required fields");
       return;
     }
@@ -127,8 +111,6 @@ export default function LessonPlan() {
         disorder: selected.disorder,
         topic: selected.topic,
         grade: selected.grade,
-        additional_info: formData.additionalInfo,
-        prompt: formData.prompt
       };
   
       // Make API call
@@ -157,7 +139,6 @@ export default function LessonPlan() {
     }
   };
   
-
   // Custom dropdown component
   const CustomDropdown = ({ name, data }) => (
     <div className="mb-7 relative">
@@ -223,6 +204,19 @@ export default function LessonPlan() {
           <p className="text-gray-700">{lessonPlan.concept}</p>
         </div>
 
+        {/* Display the raw lesson plan text as markdown */}
+        {lessonPlan.lessonPlan && (
+          <div>
+            <h3 className="font-medium text-gray-800 mb-2">Lesson Plan</h3>
+            <div className="prose prose-sm max-w-none p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <ReactMarkdown>
+                {lessonPlan.lessonPlan}
+              </ReactMarkdown>
+            </div>
+          </div>
+        )}
+
+        {/* Render examples if they exist in the structured format */}
         {lessonPlan.examples && lessonPlan.examples.length > 0 && (
           <div>
             <h3 className="font-medium text-gray-800 mb-2">Examples</h3>
@@ -273,36 +267,6 @@ export default function LessonPlan() {
         {Object.entries(dropdowns).map(([name, data]) => (
           <CustomDropdown key={name} name={name} data={data} />
         ))}
-
-        {/* Additional Notes */}
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            Additional Notes
-          </label>
-          <textarea
-            name="additionalInfo"
-            value={formData.additionalInfo}
-            onChange={handleInputChange}
-            rows="4"
-            placeholder="Any additional information..."
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 resize-none transition-all duration-200 hover:border-blue-400"
-          ></textarea>
-        </div>
-
-        {/* Main Prompt */}
-        <div className="mb-10">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            Main Prompt
-          </label>
-          <textarea
-            name="prompt"
-            value={formData.prompt}
-            onChange={handleInputChange}
-            rows="5"
-            placeholder="Write your main instructions for the AI here..."
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 resize-none transition-all duration-200 hover:border-blue-400"
-          ></textarea>
-        </div>
 
         {/* Error message */}
         {error && (

@@ -81,7 +81,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     disorder_key = disorder.lower()
     exec_skills = executive_skill_map.get(disorder_key, [])
     client = PersistentClient(
-    path="C:/Users/sheth/OneDrive/Desktop/DiverseMindAI/DiverseMindAI/diversemind-ai/Backend/app/chroma_store1/"
+    path="../chroma_store1"
 )
 
     
