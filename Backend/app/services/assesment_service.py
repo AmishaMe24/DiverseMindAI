@@ -46,7 +46,7 @@ executive_skill_map = {
 # file_path = os.path.abspath("")
 # Modify the ChromaDB client initialization part
 client = PersistentClient(
-    path="C:/Users/sheth/OneDrive/Desktop/DiverseMindAI/DiverseMindAI/diversemind-ai/Backend/app/chroma_store1/"
+    path="../chroma_store1"
 )
 
 # Get or create collections
