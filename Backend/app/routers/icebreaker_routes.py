@@ -23,7 +23,7 @@ class LessonPlanResponse(BaseModel):
     examples: List[Dict[str, Any]]
 
 @router.post("", response_model=LessonPlanResponse, status_code=status.HTTP_200_OK)
-async def get_lesson_plan(request: LessonPlanRequest):
+async def get_icebreaker_activity(request: LessonPlanRequest):
     """
     Generate a lesson plan using the RAG pipeline based on the specified disorder, topic, grade level, and additional requirements.
     """
