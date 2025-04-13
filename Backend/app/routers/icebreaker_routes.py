@@ -1,29 +1,23 @@
 from fastapi import HTTPException, status, APIRouter
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
-from chromadb.config import Settings
-from chromadb import PersistentClient
 from app.services.ice_breaker_service import generate_icebreaker
 
 
 router = APIRouter()
 
 # Request schema
-class LessonPlanRequest(BaseModel):
+class IceBreakerRequest(BaseModel):
     disorder: str = Field(..., description="Learning disorder or condition to address")
     question: str = Field(..., description="ICE BREAKER ACTIVITY")
     materials: str = Field(..., description="What Materials or If they are needed")
 
 # Response schema
-class LessonPlanResponse(BaseModel):
-    title: str
-    lessonName: str
-    gradeLevel: str
-    concept: str
-    examples: List[Dict[str, Any]]
+class IceBreakerResponse(BaseModel):
+    activity: str
 
-@router.post("", response_model=LessonPlanResponse, status_code=status.HTTP_200_OK)
-async def get_icebreaker_activity(request: LessonPlanRequest):
+@router.post("", response_model=IceBreakerRequest, status_code=status.HTTP_200_OK)
+async def get_icebreaker_activity(request: IceBreakerResponse):
     """
     Generate a lesson plan using the RAG pipeline based on the specified disorder, topic, grade level, and additional requirements.
     """
@@ -49,9 +43,10 @@ async def get_icebreaker_activity(request: LessonPlanRequest):
             )
 
         # Wrap the response into a structure your frontend expects
-        response = rag_text
         
-
+        response = {
+            "activity": rag_text
+        }
         return response
 
     except HTTPException:
