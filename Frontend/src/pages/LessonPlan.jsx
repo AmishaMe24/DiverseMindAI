@@ -28,11 +28,23 @@ export default function LessonPlan() {
         { label: 'Other', value: 'other' },
       ],
     },
+    subject: {
+      label: 'Subject',
+      options: [
+        { label: 'Number and Number Sense', value: 'Number and Number Sense' },
+        { label: 'Science', value: 'science' },
+        { label: 'English', value: 'english' },
+        { label: 'Social Studies', value: 'social_studies' },
+        { label: 'Art', value: 'art' },
+        { label: 'Music', value: 'music' },
+        { label: 'Physical Education', value: 'physical_education' },
+      ],
+    },
     topic: {
       label: 'Topic (Chapter)',
       options: [
-        { label: 'Fractions', value: 'fractions' },
-        { label: 'Decimals', value: 'decimals' },
+        { label: 'Counting and writing numerals from 0 to 110', value: 'Counting and writing numerals from 0 to 110' },
+        { label: 'Counting backward', value: 'Counting backward' },
         { label: 'Algebra', value: 'algebra' },
         { label: 'Geometry', value: 'geometry' },
         { label: 'Statistics', value: 'statistics' },
@@ -47,14 +59,14 @@ export default function LessonPlan() {
     grade: {
       label: 'Grade Level',
       options: [
-        { label: '1st Grade', value: '1st_grade' },
-        { label: '2nd Grade', value: '2nd_grade' },
-        { label: '3rd Grade', value: '3rd_grade' },
-        { label: '4th Grade', value: '4th_grade' },
-        { label: '5th Grade', value: '5th_grade' },
-        { label: '6th Grade', value: '6th_grade' },
-        { label: '7th Grade', value: '7th_grade' },
-        { label: '8th Grade', value: '8th_grade' },
+        { label: '1st Grade', value: '1' },
+        { label: '2nd Grade', value: '2' },
+        { label: '3rd Grade', value: '3' },
+        { label: '4th Grade', value: '4' },
+        { label: '5th Grade', value: '5' },
+        { label: '6th Grade', value: '6' },
+        { label: '7th Grade', value: '7' },
+        { label: '8th Grade', value: '8' },
       ],
     },
   }
@@ -62,6 +74,7 @@ export default function LessonPlan() {
   // State for selected values
   const [selected, setSelected] = useState({
     disorder: '',
+    subject: '',
     topic: '',
     grade: '',
   })
@@ -98,7 +111,7 @@ export default function LessonPlan() {
   // Handle form submission
   const handleSubmit = async () => {
     // Validate form data
-    if (!selected.disorder || !selected.topic || !selected.grade) {
+    if (!selected.disorder || !selected.subject || !selected.topic || !selected.grade) {
       setError('Please fill in all required fields')
       return
     }
@@ -114,6 +127,7 @@ export default function LessonPlan() {
       // Prepare request body
       const requestBody = {
         disorder: selected.disorder,
+        subject: selected.subject,
         topic: selected.topic,
         grade: selected.grade,
       }
@@ -376,6 +390,11 @@ export default function LessonPlan() {
         const headerInfo = `
           <h1>${titleText}</h1>
           <div class="header-info">
+            <div class="header-item"><strong>Subject:</strong> ${
+              dropdowns.subject.options.find(
+                (opt) => opt.value === selected.subject
+              )?.label || selected.subject
+            }</div>
             <div class="header-item"><strong>Topic:</strong> ${
               dropdowns.topic.options.find(
                 (opt) => opt.value === selected.topic

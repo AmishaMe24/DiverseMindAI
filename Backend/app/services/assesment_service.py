@@ -46,7 +46,7 @@ executive_skill_map = {
 # file_path = os.path.abspath("")
 # Modify the ChromaDB client initialization part
 client = PersistentClient(
-    path="../chroma_store1"
+    path="./app/chroma_store1"
 )
 
 # Get or create collections

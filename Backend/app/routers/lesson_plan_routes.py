@@ -10,11 +10,10 @@ router = APIRouter()
 
 # Request schema
 class LessonPlanRequest(BaseModel):
+    subject: str = Field(..., description="Subject for the lesson plan")
     disorder: str = Field(..., description="Learning disorder or condition to address")
     topic: str = Field(..., description="Mathematical topic for the lesson")
     grade: str = Field(..., description="Grade level for the lesson")
-    additional_info: Optional[str] = Field(None, description="Additional information or requirements")
-    prompt: str = Field(..., description="Main prompt for lesson plan generation")
 
 # Response schema
 class LessonPlanResponse(BaseModel):
@@ -30,24 +29,26 @@ async def get_lesson_plan(request: LessonPlanRequest):
     Generate a lesson plan using the RAG pipeline based on the specified disorder, topic, grade level, and additional requirements.
     """
     try:
-        # Normalize input
-        # disorder = request.disorder.lower().strip().replace(" ", "_")
-        # topic = request.topic.lower().strip().replace(" ", "_")
-        # grade = request.grade.lower().strip().replace(" ", "_")
-
-        subject = 'Number and Number Sense'
-        topic = 'Reading, writing, and identifying the place value of six-digit numerals'
-        grade = '3'
-        disorder = 'dyscalculia'
-
+        # subject = 'Number and Number Sense'
+        # topic = 'Reading, writing, and identifying the place value of six-digit numerals'
+        # grade = '3'
+        # disorder = 'dyscalculia'
         
+        # print("Hard coded: ", subject, topic, grade, disorder)
+        
+        subject = request.subject
+        topic = request.topic
+        grade = request.grade
+        disorder = request.disorder
+        
+        print("From request param", subject, topic, grade, disorder)
 
         # Call the RAG pipeline
         rag_text = generate_adaptive_lesson_plan(
-            grade=grade,
-            topic=topic,
+            grade= grade,
+            topic= topic,
             subject = subject,
-            disorder=disorder
+            disorder= disorder
         )
 
         if not rag_text:
