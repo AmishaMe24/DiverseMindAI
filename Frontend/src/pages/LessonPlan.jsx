@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ChevronDown, Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { marked } from 'marked' // You'll need to install this package
+import { downloadLessonPlanAsPDF } from '../utils/lessonPlanPdfGenerator'
+import dropdownData from '../data/dropdownData.json'
 
 export default function LessonPlan() {
   const [openDropdown, setOpenDropdown] = useState(null)
@@ -16,61 +17,6 @@ export default function LessonPlan() {
   const [isPdfLoading, setIsPdfLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // Dropdown data based on Enum values from the backend
-  const dropdowns = {
-    disorder: {
-      label: 'Disorder',
-      options: [
-        { label: 'Dyscalculia', value: 'dyscalculia' },
-        { label: 'Dyslexia', value: 'dyslexia' },
-        { label: 'ADHD', value: 'adhd' },
-        { label: 'Autism', value: 'autism' },
-        { label: 'Other', value: 'other' },
-      ],
-    },
-    subject: {
-      label: 'Subject',
-      options: [
-        { label: 'Number and Number Sense', value: 'Number and Number Sense' },
-        { label: 'Science', value: 'science' },
-        { label: 'English', value: 'english' },
-        { label: 'Social Studies', value: 'social_studies' },
-        { label: 'Art', value: 'art' },
-        { label: 'Music', value: 'music' },
-        { label: 'Physical Education', value: 'physical_education' },
-      ],
-    },
-    topic: {
-      label: 'Topic (Chapter)',
-      options: [
-        { label: 'Counting and writing numerals from 0 to 110', value: 'Counting and writing numerals from 0 to 110' },
-        { label: 'Counting backward', value: 'Counting backward' },
-        { label: 'Algebra', value: 'algebra' },
-        { label: 'Geometry', value: 'geometry' },
-        { label: 'Statistics', value: 'statistics' },
-        { label: 'Measurement', value: 'measurement' },
-        { label: 'Data Analysis', value: 'data_analysis' },
-        { label: 'Probability', value: 'probability' },
-        { label: 'Ratios', value: 'ratios' },
-        { label: 'Number Sense', value: 'number_sense' },
-        { label: 'Problem Solving', value: 'problem_solving' },
-      ],
-    },
-    grade: {
-      label: 'Grade Level',
-      options: [
-        { label: '1st Grade', value: '1' },
-        { label: '2nd Grade', value: '2' },
-        { label: '3rd Grade', value: '3' },
-        { label: '4th Grade', value: '4' },
-        { label: '5th Grade', value: '5' },
-        { label: '6th Grade', value: '6' },
-        { label: '7th Grade', value: '7' },
-        { label: '8th Grade', value: '8' },
-      ],
-    },
-  }
-
   // State for selected values
   const [selected, setSelected] = useState({
     disorder: '',
@@ -78,6 +24,54 @@ export default function LessonPlan() {
     topic: '',
     grade: '',
   })
+
+  // State for available options based on selections
+  const [availableSubjects, setAvailableSubjects] = useState([])
+  const [availableTopics, setAvailableTopics] = useState([])
+
+  // Update available subjects when grade changes
+  useEffect(() => {
+    if (selected.grade) {
+      setAvailableSubjects(dropdownData.subjects[selected.grade] || [])
+      // Reset subject and topic when grade changes
+      setSelected(prev => ({ ...prev, subject: '', topic: '' }))
+    } else {
+      setAvailableSubjects([])
+    }
+  }, [selected.grade])
+
+  // Update available topics when subject changes
+  useEffect(() => {
+    if (selected.grade && selected.subject) {
+      setAvailableTopics(
+        dropdownData.topics[selected.grade]?.[selected.subject] || []
+      )
+      // Reset topic when subject changes
+      setSelected(prev => ({ ...prev, topic: '' }))
+    } else {
+      setAvailableTopics([])
+    }
+  }, [selected.grade, selected.subject])
+
+  // Dropdown data based on JSON file
+  const dropdowns = {
+    grade: {
+      label: 'Grade Level',
+      options: dropdownData.grades,
+    },
+    subject: {
+      label: 'Subject',
+      options: availableSubjects,
+    },
+    topic: {
+      label: 'Topic (Chapter)',
+      options: availableTopics,
+    },
+    disorder: {
+      label: 'Learning Accommodation',
+      options: dropdownData.disorders,
+    },
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -215,319 +209,10 @@ export default function LessonPlan() {
     </div>
   )
 
-  // Function to convert markdown to HTML
-  const markdownToHtml = (markdown) => {
-    if (!markdown) return ''
-    try {
-      // Use marked to convert markdown to HTML
-      return marked.parse(markdown)
-    } catch (error) {
-      console.error('Error parsing markdown:', error)
-      // Fallback to simple formatting if marked fails
-      return markdown
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/^#{6}\s+(.*)$/gm, '<h6>$1</h6>')
-        .replace(/^#{5}\s+(.*)$/gm, '<h5>$1</h5>')
-        .replace(/^#{4}\s+(.*)$/gm, '<h4>$1</h4>')
-        .replace(/^#{3}\s+(.*)$/gm, '<h3>$1</h3>')
-        .replace(/^#{2}\s+(.*)$/gm, '<h2>$1</h2>')
-        .replace(/^#{1}\s+(.*)$/gm, '<h1>$1</h1>')
-    }
-  }
 
-  // Function to handle PDF download
+  // Function to handle PDF download - simplified to use the utility
   const downloadPDF = () => {
-    if (!lessonPlan) return
-
-    setIsPdfLoading(true)
-
-    try {
-      // Convert lesson plan markdown to HTML
-      const lessonPlanHtml = markdownToHtml(lessonPlan.lessonPlan)
-
-      // Use browser's print functionality to save as PDF
-      const printWindow = window.open('', '_blank')
-
-      if (printWindow) {
-        // Prepare CSS for PDF
-        const printStyles = `
-          <style>
-            @page {
-              margin: 2cm;
-            }
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              color: #333;
-              max-width: 800px;
-              margin: 0 auto;
-            }
-            h1 {
-              color: #1e3a8a;
-              border-bottom: 2px solid #3b82f6;
-              padding-bottom: 10px;
-              font-size: 24px;
-              margin-bottom: 20px;
-            }
-            h2 {
-              color: #1e40af;
-              font-size: 20px;
-              margin-top: 30px;
-              border-left: 4px solid #3b82f6;
-              padding-left: 10px;
-            }
-            h3 {
-              color: #2563eb;
-              font-size: 18px;
-              margin-top: 20px;
-            }
-            h4 {
-              color: #3b82f6;
-              font-size: 16px;
-              margin-top: 16px;
-            }
-            h5, h6 {
-              font-size: 14px;
-              margin-top: 12px;
-            }
-            .header-info {
-              margin-bottom: 20px;
-              padding-bottom: 15px;
-              border-bottom: 1px solid #e5e7eb;
-            }
-            .header-item {
-              margin-bottom: 5px;
-              font-size: 14px;
-            }
-            .section {
-              margin-bottom: 30px;
-            }
-            .subsection {
-              margin-bottom: 20px;
-              border-left: 4px solid #3b82f6;
-              padding-left: 12px;
-            }
-            .method-name {
-              font-weight: bold;
-              color: #2563eb;
-              margin-bottom: 8px;
-              font-size: 15px;
-            }
-            .strategy-box {
-              background-color: #f0f4ff;
-              padding: 12px 15px;
-              border-radius: 5px;
-              margin-top: 15px;
-              border: 1px solid #dbeafe;
-            }
-            .strategy-title {
-              font-weight: bold;
-              margin-bottom: 8px;
-              color: #1e40af;
-            }
-            ul, ol {
-              padding-left: 20px;
-              margin-top: 8px;
-              margin-bottom: 15px;
-            }
-            li {
-              margin-bottom: 5px;
-            }
-            p {
-              margin-bottom: 12px;
-            }
-            strong {
-              color: #1e40af;
-            }
-            .lesson-plan-content {
-              background-color: #f9fafb;
-              padding: 15px;
-              border-radius: 5px;
-              border: 1px solid #e5e7eb;
-              margin-bottom: 25px;
-            }
-            .concept {
-              font-style: italic;
-              margin-bottom: 20px;
-              padding: 10px;
-              background-color: #f3f4f6;
-              border-radius: 5px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 15px 0;
-            }
-            th, td {
-              padding: 8px 12px;
-              border: 1px solid #e5e7eb;
-              text-align: left;
-            }
-            th {
-              background-color: #f3f4f6;
-            }
-            code {
-              background-color: #f3f4f6;
-              padding: 2px 4px;
-              border-radius: 3px;
-              font-family: monospace;
-            }
-            blockquote {
-              border-left: 4px solid #e5e7eb;
-              padding-left: 15px;
-              margin-left: 0;
-              color: #4b5563;
-            }
-          </style>
-        `
-
-        // Create title for the PDF
-        const titleText = lessonPlan.lessonName || 'Generated Lesson Plan'
-
-        // Prepare header content with metadata
-        const headerInfo = `
-          <h1>${titleText}</h1>
-          <div class="header-info">
-            <div class="header-item"><strong>Subject:</strong> ${
-              dropdowns.subject.options.find(
-                (opt) => opt.value === selected.subject
-              )?.label || selected.subject
-            }</div>
-            <div class="header-item"><strong>Topic:</strong> ${
-              dropdowns.topic.options.find(
-                (opt) => opt.value === selected.topic
-              )?.label || selected.topic
-            }</div>
-            <div class="header-item"><strong>Grade Level:</strong> ${
-              dropdowns.grade.options.find(
-                (opt) => opt.value === selected.grade
-              )?.label || selected.grade
-            }</div>
-            <div class="header-item"><strong>Accommodation For:</strong> ${
-              dropdowns.disorder.options.find(
-                (opt) => opt.value === selected.disorder
-              )?.label || selected.disorder
-            }</div>
-          </div>
-        `
-
-        // Format examples for PDF
-        let examplesHtml = ''
-        if (lessonPlan.examples && lessonPlan.examples.length > 0) {
-          examplesHtml = `
-            <div class="section">
-              <h2>Examples</h2>
-              ${lessonPlan.examples
-                .map(
-                  (example) => `
-                <div class="subsection">
-                  <h3>${example.section}</h3>
-                  ${
-                    example.methods
-                      ? example.methods
-                          .map(
-                            (method) => `
-                    <div style="margin-top: 15px;">
-                      <div class="method-name">${method.name}</div>
-                      <ul>
-                        ${
-                          method.steps
-                            ? method.steps
-                                .map(
-                                  (step) => `
-                          <li>${step}</li>
-                        `
-                                )
-                                .join('')
-                            : ''
-                        }
-                      </ul>
-                    </div>
-                  `
-                          )
-                          .join('')
-                      : ''
-                  }
-                  
-                  ${
-                    example.executiveFunctionStrategy
-                      ? `
-                    <div class="strategy-box">
-                      <div class="strategy-title">${
-                        example.executiveFunctionStrategy.title
-                      }</div>
-                      <ul>
-                        ${
-                          example.executiveFunctionStrategy.strategies
-                            ? example.executiveFunctionStrategy.strategies
-                                .map(
-                                  (strategy) => `
-                            <li>${strategy}</li>
-                          `
-                                )
-                                .join('')
-                            : ''
-                        }
-                      </ul>
-                    </div>
-                  `
-                      : ''
-                  }
-                </div>
-              `
-                )
-                .join('')}
-            </div>
-          `
-        }
-
-        // Create the print document
-        printWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>${titleText}</title>
-            ${printStyles}
-          </head>
-          <body>
-            ${headerInfo}
-            
-            <div class="section">
-              <h2>Concept</h2>
-              <div class="concept">${lessonPlan.concept || ''}</div>
-            </div>
-            
-            <div class="section">
-              <h2>Lesson Plan</h2>
-              <div class="lesson-plan-content">
-                ${lessonPlanHtml}
-              </div>
-            </div>
-            
-            ${examplesHtml}
-          </body>
-          </html>
-        `)
-
-        printWindow.document.close()
-
-        // Wait for content to load
-        printWindow.onload = function () {
-          printWindow.focus()
-          printWindow.print()
-          printWindow.close()
-          setIsPdfLoading(false)
-        }
-      } else {
-        throw new Error('Could not open print window')
-      }
-    } catch (err) {
-      console.error('Error generating PDF:', err)
-      alert('There was a problem generating the PDF. Please try again.')
-      setIsPdfLoading(false)
-    }
+    downloadLessonPlanAsPDF(lessonPlan, selected, dropdowns, setIsPdfLoading)
   }
 
   // Render lesson plan from API response
@@ -616,10 +301,11 @@ export default function LessonPlan() {
           Lesson Plan Generator
         </h1>
 
-        {/* Custom Dropdowns */}
-        {Object.entries(dropdowns).map(([name, data]) => (
-          <CustomDropdown key={name} name={name} data={data} />
-        ))}
+        {/* Custom Dropdowns - display in specific order */}
+        <CustomDropdown name="grade" data={dropdowns.grade} />
+        <CustomDropdown name="subject" data={dropdowns.subject} />
+        <CustomDropdown name="topic" data={dropdowns.topic} />
+        <CustomDropdown name="disorder" data={dropdowns.disorder} />
 
         {/* Error message */}
         {error && (
