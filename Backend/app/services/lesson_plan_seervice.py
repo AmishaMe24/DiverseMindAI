@@ -39,68 +39,60 @@ executive_skill_map = {
 }
 
 
-def get_context(client):
-    try:
-        lesson_collection = client.get_collection("lesson_plans")
-    except Exception as e:
-        print(f"Error getting lesson_plans collection: {e}")
-        # Create the collection
-        lesson_collection = client.create_collection(
-            name="lesson_plans",
-            metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
-        )
-
-    try:
-        exec_collection = client.get_collection("exec_skills")
-    except Exception as e:
-        print(f"Error getting exec_skills collection: {e}")
-        # Create the collection
-        exec_collection = client.create_collection(
-            name="exec_skills",
-            metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
-        )
-
-    print(f'lesson_collection{lesson_collection.peek()}')
-    print(f'exec_collection{exec_collection.peek()}')
-
-    return lesson_collection, exec_collection
-
 
 # FUNCTION: Generate the augmented lesson plan
 # Load ChromaDB collections
 
 # file_path = os.path.abspath("")
 # Modify the ChromaDB client initialization part
-
+client = PersistentClient(
+    path="C:/Users/sheth/OneDrive/Desktop/DiverseMindAI/DiverseMindAI/diversemind-ai/Backend/app/chroma_store1/"
+)
 
 # Get or create collections
+try:
+    lesson_collection = client.get_collection("lesson_plans")
+except Exception as e:
+    print(f"Error getting lesson_plans collection: {e}")
+    # Create the collection
+    lesson_collection = client.create_collection(
+        name="lesson_plans",
+        metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
+    )
 
+try:
+    exec_collection = client.get_collection("exec_skills")
+except Exception as e:
+    print(f"Error getting exec_skills collection: {e}")
+    # Create the collection
+    exec_collection = client.create_collection(
+        name="exec_skills",
+        metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
+    )
     
 # FUNCTION: Generate the augmented lesson plan
 def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     disorder_key = disorder.lower()
     exec_skills = executive_skill_map.get(disorder_key, [])
-    client = PersistentClient(
-    path="../chroma_store1"
-)
+    print(exec_skills)
 
     
-    lesson_collection, exec_collection = get_context(client)
+    
     # Get lesson chunks
     lesson_results = lesson_collection.query(
-        query_texts=[f"{topic} in {subject} for grade {grade}"],  # semantic hint
-        n_results=5,
-        where={
-            "$and": [
-                {"grade": str(grade).strip()},
-                {"subject": subject.strip()},
-                {"topic": topic.strip()}
-            ]
-        },
-        include=["documents", "metadatas"]
-    )
+    query_texts=[f"{topic} in {subject} for grade {grade}"],  # semantic hint
+    n_results=5,
+    where={
+        "$and": [
+            {"grade": str(grade).strip()},
+            {"subject": subject.strip()},
+            {"topic": topic.strip()}
+        ]
+    },
+    include=["documents", "metadatas"]
+)
 
-    print(f'lesson  results--------------------------------------------------------------:\n{lesson_results}')
+    print(f'lesson  results--------------------------------------------------------------:{lesson_results}')
     
     
     lesson_context = "\n\n".join(lesson_results["documents"][0])
@@ -118,7 +110,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
         exec_contexts.extend(results["documents"][0])
     exec_context = "\n\n".join(exec_contexts)
 
-    print(f'exec_context--------------------------------------------------------------:\n{exec_context}')
+    print(f'exec_context:{exec_context}')
 
     # Prompt template
     prompt = f"""
@@ -144,7 +136,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     5. Real-Life Applications (15 min)
     6. Wrap-Up & Reflection (10 min)
 
-    Each section should include
+    Each section should include:
     - Method
     - Activities
     - Executive Function Strategy

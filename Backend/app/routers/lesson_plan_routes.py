@@ -13,6 +13,8 @@ class LessonPlanRequest(BaseModel):
     disorder: str = Field(..., description="Learning disorder or condition to address")
     topic: str = Field(..., description="Mathematical topic for the lesson")
     grade: str = Field(..., description="Grade level for the lesson")
+    additional_info: Optional[str] = Field(None, description="Additional information or requirements")
+    prompt: str = Field(..., description="Main prompt for lesson plan generation")
 
 # Response schema
 class LessonPlanResponse(BaseModel):
