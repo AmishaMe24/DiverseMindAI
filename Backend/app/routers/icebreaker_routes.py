@@ -9,7 +9,7 @@ router = APIRouter()
 # Request schema
 class IceBreakerRequest(BaseModel):
     disorder: str = Field(..., description="Learning disorder or condition to address")
-    question: str = Field(..., description="ICE BREAKER ACTIVITY")
+    activity: str = Field(..., description="ICE BREAKER ACTIVITY")
     materials: str = Field(..., description="What Materials or If they are needed")
     setting: str = Field(..., description="Virtual / In-Person")
 
@@ -17,8 +17,8 @@ class IceBreakerRequest(BaseModel):
 class IceBreakerResponse(BaseModel):
     activity: str
 
-@router.post("", response_model=IceBreakerRequest, status_code=status.HTTP_200_OK)
-async def get_icebreaker_activity(request: IceBreakerResponse):
+@router.post("", response_model=IceBreakerResponse, status_code=status.HTTP_200_OK)
+async def get_icebreaker_activity(request: IceBreakerRequest):
     """
     Generate a lesson plan using the RAG pipeline based on the specified disorder, topic, grade level, and additional requirements.
     """
@@ -27,13 +27,13 @@ async def get_icebreaker_activity(request: IceBreakerResponse):
         materials_filter = "No Materials are necessary for this activity."
         disorder="dyslexic"
         setting="In-Person"
-
+        
         rag_text = generate_icebreaker(
             materials=materials_filter,
             question=question,
             disorder=disorder
         )
-
+        print(rag_text)
         if not rag_text:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

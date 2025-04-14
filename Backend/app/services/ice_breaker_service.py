@@ -120,10 +120,13 @@ def ask_question_rag(question, collection, embedder, materials_filter=None, k=4,
 def generate_icebreaker(question,materials, disorder):
     disorder_key = disorder.lower()
     exec_skills = executive_skill_map.get(disorder_key, [])
-    client = PersistentClient(path="native_chroma_icebreakers")
+    client = PersistentClient(
+        path="../chroma_store1"
+    )
+    lesson_collection, exec_collection = get_context(client)
 
-    
-    icebreaker_collection, exec_collection = get_context(client)
+    client = PersistentClient(path="native_chroma_icebreakers")
+    icebreaker_collection = get_context(client)
     icebreaker_context = ask_question_rag(
         question=question,
         collection=icebreaker_collection,
