@@ -11,6 +11,7 @@ class IceBreakerRequest(BaseModel):
     disorder: str = Field(..., description="Learning disorder or condition to address")
     question: str = Field(..., description="ICE BREAKER ACTIVITY")
     materials: str = Field(..., description="What Materials or If they are needed")
+    setting: str = Field(..., description="Virtual / In-Person")
 
 # Response schema
 class IceBreakerResponse(BaseModel):
@@ -25,6 +26,7 @@ async def get_icebreaker_activity(request: IceBreakerResponse):
         question = "Give me an icebreaker that requires no materials"
         materials_filter = "No Materials are necessary for this activity."
         disorder="dyslexic"
+        setting="In-Person"
 
         rag_text = generate_icebreaker(
             materials=materials_filter,
