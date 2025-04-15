@@ -14,7 +14,7 @@ export default function IceBreaker() {
   };
 
   const [selected, setSelected] = useState({ disorder: "", setting: "" });
-  const [activityType, setActivityType] = useState("");
+  const [activity, setActivityType] = useState("");
   const [materials, setMaterials] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -54,7 +54,7 @@ export default function IceBreaker() {
       const requestBody = {
         disorder: selected.disorder,
         setting: selected.setting,
-        activityType,
+        activity,
         materials,
       };
 
@@ -65,14 +65,13 @@ export default function IceBreaker() {
         },
         body: JSON.stringify(requestBody),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail?.message || "Failed to fetch lesson plan");
       }
 
       const data = await response.json();
-      setLessonPlan(data);
+      setLessonPlan(data["activity"]);
       setShowOutput(true);
     } catch (err) {
       setError(err.message || "An unexpected error occurred");
@@ -130,7 +129,7 @@ export default function IceBreaker() {
           <label className="block mb-3 text-sm font-medium text-gray-700">Activity Type</label>
           <textarea
             rows="3"
-            value={activityType}
+            value={activity}
             onChange={(e) => setActivityType(e.target.value)}
             placeholder="E.g., Team-building, fun introduction..."
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-gray-50 resize-none"
@@ -170,7 +169,8 @@ export default function IceBreaker() {
               </button>
             </div>
             <p className="text-gray-700">
-              "Two Truths and a Lie" adapted for students with {selected.disorder || "diverse needs"}. Helps break the ice while promoting memory and focus!
+              {lessonPlan}
+              {/* "Two Truths and a Lie" adapted for students with {selected.disorder || "diverse needs"}. Helps break the ice while promoting memory and focus! */}
             </p>
           </div>
         )}
