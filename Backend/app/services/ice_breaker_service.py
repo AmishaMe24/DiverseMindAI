@@ -20,6 +20,7 @@ openai.api_key = "sk-or-v1-d81bcd0a2420275cb31a68a397af80191424290baab90e36700c1
 llm_model = LLMs['gemini']
 # print("LLM_KEY:", os.getenv("LLM_KEY"))
 
+
 # Executive Skill Map
 executive_skill_map = {
     "dyscalculia": ["Enhancing Working Memory", "Cultivating Metacognition", "Fostering Organization", "Promoting, Planning, and Prioritizing"],
