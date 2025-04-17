@@ -1,118 +1,131 @@
-import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown } from "lucide-react";
-import ReactMarkdown from 'react-markdown';
+import React, { useState, useEffect, useRef } from 'react'
+import { ChevronDown, Download } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import { downloadLessonPlanAsPDF } from '../utils/lessonPlanPdfGenerator'
+import dropdownData from '../data/dropdownData.json'
 
 export default function LessonPlan() {
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [hoveredOption, setHoveredOption] = useState(null);
-  const [showOutput, setShowOutput] = useState(false);
-  const dropdownRef = useRef({});
+  const [openDropdown, setOpenDropdown] = useState(null)
+  const [hoveredOption, setHoveredOption] = useState(null)
+  const [showOutput, setShowOutput] = useState(false)
+  const dropdownRef = useRef({})
+  const pdfRef = useRef()
 
   // State for API response and loading/error states
-  const [lessonPlan, setLessonPlan] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Dropdown data based on Enum values from the backend
-  const dropdowns = {
-    disorder: {
-      label: "Disorder",
-      options: [
-        { label: "Dyscalculia", value: "dyscalculia" },
-        { label: "Dyslexia", value: "dyslexia" },
-        { label: "ADHD", value: "adhd" },
-        { label: "Autism", value: "autism" },
-        { label: "Other", value: "other" }
-      ]
-    },
-    topic: {
-      label: "Topic (Chapter)",
-      options: [
-        { label: "Fractions", value: "fractions" },
-        { label: "Decimals", value: "decimals" },
-        { label: "Algebra", value: "algebra" },
-        { label: "Geometry", value: "geometry" },
-        { label: "Statistics", value: "statistics" },
-        { label: "Measurement", value: "measurement" },
-        { label: "Data Analysis", value: "data_analysis" },
-        { label: "Probability", value: "probability" },
-        { label: "Ratios", value: "ratios" },
-        { label: "Number Sense", value: "number_sense" },
-        { label: "Problem Solving", value: "problem_solving" }
-      ]
-    },
-    grade: {
-      label: "Grade Level",
-      options: [
-        { label: "1st Grade", value: "1st_grade" },
-        { label: "2nd Grade", value: "2nd_grade" },
-        { label: "3rd Grade", value: "3rd_grade" },
-        { label: "4th Grade", value: "4th_grade" },
-        { label: "5th Grade", value: "5th_grade" },
-        { label: "6th Grade", value: "6th_grade" },
-        { label: "7th Grade", value: "7th_grade" },
-        { label: "8th Grade", value: "8th_grade" }
-      ]
-    }
-  };
+  const [lessonPlan, setLessonPlan] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isPdfLoading, setIsPdfLoading] = useState(false)
+  const [error, setError] = useState(null)
 
   // State for selected values
   const [selected, setSelected] = useState({
-    disorder: "",
-    topic: "",
-    grade: ""
-  });
+    disorder: '',
+    subject: '',
+    topic: '',
+    grade: '',
+  })
+
+  // State for available options based on selections
+  const [availableSubjects, setAvailableSubjects] = useState([])
+  const [availableTopics, setAvailableTopics] = useState([])
+
+  // Update available subjects when grade changes
+  useEffect(() => {
+    if (selected.grade) {
+      setAvailableSubjects(dropdownData.subjects[selected.grade] || [])
+      // Reset subject and topic when grade changes
+      setSelected(prev => ({ ...prev, subject: '', topic: '' }))
+    } else {
+      setAvailableSubjects([])
+    }
+  }, [selected.grade])
+
+  // Update available topics when subject changes
+  useEffect(() => {
+    if (selected.grade && selected.subject) {
+      setAvailableTopics(
+        dropdownData.topics[selected.grade]?.[selected.subject] || []
+      )
+      // Reset topic when subject changes
+      setSelected(prev => ({ ...prev, topic: '' }))
+    } else {
+      setAvailableTopics([])
+    }
+  }, [selected.grade, selected.subject])
+
+  // Dropdown data based on JSON file
+  const dropdowns = {
+    grade: {
+      label: 'Grade Level',
+      options: dropdownData.grades,
+    },
+    subject: {
+      label: 'Subject',
+      options: availableSubjects,
+    },
+    topic: {
+      label: 'Topic (Chapter)',
+      options: availableTopics,
+    },
+    disorder: {
+      label: 'Learning Accommodation',
+      options: dropdownData.disorders,
+    },
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
-      if (openDropdown && 
-          dropdownRef.current[openDropdown] && 
-          !dropdownRef.current[openDropdown].contains(event.target)) {
-        setOpenDropdown(null);
+      if (
+        openDropdown &&
+        dropdownRef.current[openDropdown] &&
+        !dropdownRef.current[openDropdown].contains(event.target)
+      ) {
+        setOpenDropdown(null)
       }
     }
-    
-    document.addEventListener("mousedown", handleClickOutside);
+
+    document.addEventListener('mousedown', handleClickOutside)
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [openDropdown]);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [openDropdown])
 
   // Toggle dropdown open/close
   const toggleDropdown = (name) => {
-    setOpenDropdown(openDropdown === name ? null : name);
-  };
+    setOpenDropdown(openDropdown === name ? null : name)
+  }
 
   // Select an option
   const selectOption = (dropdownName, value) => {
-    setSelected({...selected, [dropdownName]: value});
-    setOpenDropdown(null);
-  };
+    setSelected({ ...selected, [dropdownName]: value })
+    setOpenDropdown(null)
+  }
 
   // Handle form submission
   const handleSubmit = async () => {
     // Validate form data
-    if (!selected.disorder || !selected.topic || !selected.grade) {
-      setError("Please fill in all required fields");
-      return;
+    if (!selected.disorder || !selected.subject || !selected.topic || !selected.grade) {
+      setError('Please fill in all required fields')
+      return
     }
-  
+
     // Clear previous lesson plan before making a new request
-    setLessonPlan(null);
-    setShowOutput(false); // Hide the previous output if any
-  
-    setIsLoading(true);
-    setError(null);
-  
+    setLessonPlan(null)
+    setShowOutput(false) // Hide the previous output if any
+
+    setIsLoading(true)
+    setError(null)
+
     try {
       // Prepare request body
       const requestBody = {
         disorder: selected.disorder,
+        subject: selected.subject,
         topic: selected.topic,
         grade: selected.grade,
-      };
-  
+      }
+
       // Make API call
       const response = await fetch('http://localhost:8000/lesson-plan', {
         method: 'POST',
@@ -120,50 +133,57 @@ export default function LessonPlan() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(requestBody),
-      });
-  
+      })
+
       // Handle response
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail?.message || 'Failed to fetch lesson plan');
+        const errorData = await response.json()
+        throw new Error(
+          errorData.detail?.message || 'Failed to fetch lesson plan'
+        )
       }
-  
-      const data = await response.json();
-      setLessonPlan(data);
-      setShowOutput(true);
+
+      const data = await response.json()
+      setLessonPlan(data)
+      setShowOutput(true)
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred');
-      console.error('Error fetching lesson plan:', err);
+      setError(err.message || 'An unexpected error occurred')
+      console.error('Error fetching lesson plan:', err)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
-  
+  }
+
   // Custom dropdown component
   const CustomDropdown = ({ name, data }) => (
     <div className="mb-7 relative">
       <label className="block mb-3 text-sm font-medium text-gray-700">
         {data.label}
       </label>
-      <div className="relative" ref={el => dropdownRef.current[name] = el}>
-        <button 
+      <div className="relative" ref={(el) => (dropdownRef.current[name] = el)}>
+        <button
           onClick={() => toggleDropdown(name)}
           className="flex items-center justify-between w-full p-3 text-left border bg-white border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
         >
-          <span className={selected[name] ? "text-gray-800" : "text-gray-500"}>
-            {data.options.find(option => option.value === selected[name])?.label || "Select..."}
+          <span className={selected[name] ? 'text-gray-800' : 'text-gray-500'}>
+            {data.options.find((option) => option.value === selected[name])
+              ?.label || 'Select...'}
           </span>
-          <ChevronDown 
-            className={`text-gray-500 transition-transform duration-200 ${openDropdown === name ? "transform rotate-180" : ""}`} 
-            size={18} 
+          <ChevronDown
+            className={`text-gray-500 transition-transform duration-200 ${
+              openDropdown === name ? 'transform rotate-180' : ''
+            }`}
+            size={18}
           />
         </button>
-        
+
         {/* Dropdown menu */}
         {openDropdown === name && (
           <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 max-h-60 overflow-auto">
             <div className="sticky top-0 bg-gray-50 px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
-              {hoveredOption?.startsWith(name) ? hoveredOption.split('-')[1] : 'Select an option'}
+              {hoveredOption?.startsWith(name)
+                ? hoveredOption.split('-')[1]
+                : 'Select an option'}
             </div>
             {data.options.map(({ label, value }) => (
               <div
@@ -172,11 +192,12 @@ export default function LessonPlan() {
                 onMouseEnter={() => setHoveredOption(`${name}-${value}`)}
                 onMouseLeave={() => setHoveredOption(null)}
                 className={`px-4 py-2 cursor-pointer transition-colors duration-150 
-                  ${hoveredOption === `${name}-${value}` 
-                    ? "bg-blue-100 text-blue-700" 
-                    : selected[name] === value 
-                      ? "bg-blue-50 text-blue-600 font-medium" 
-                      : "text-gray-700 hover:bg-gray-50"
+                  ${
+                    hoveredOption === `${name}-${value}`
+                      ? 'bg-blue-100 text-blue-700'
+                      : selected[name] === value
+                      ? 'bg-blue-50 text-blue-600 font-medium'
+                      : 'text-gray-700 hover:bg-gray-50'
                   }`}
               >
                 {label}
@@ -186,14 +207,20 @@ export default function LessonPlan() {
         )}
       </div>
     </div>
-  );
+  )
+
+
+  // Function to handle PDF download - simplified to use the utility
+  const downloadPDF = () => {
+    downloadLessonPlanAsPDF(lessonPlan, selected, dropdowns, setIsPdfLoading)
+  }
 
   // Render lesson plan from API response
   const renderLessonPlan = () => {
-    if (!lessonPlan) return null;
+    if (!lessonPlan) return null
 
     return (
-      <div className="space-y-6">
+      <div id="lesson-plan-content" className="space-y-6" ref={pdfRef}>
         <div>
           <h3 className="font-medium text-gray-800 mb-1">Lesson Title</h3>
           <p className="text-gray-700">{lessonPlan.lessonName}</p>
@@ -209,9 +236,7 @@ export default function LessonPlan() {
           <div>
             <h3 className="font-medium text-gray-800 mb-2">Lesson Plan</h3>
             <div className="prose prose-sm max-w-none p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <ReactMarkdown>
-                {lessonPlan.lessonPlan}
-              </ReactMarkdown>
+              <ReactMarkdown>{lessonPlan.lessonPlan}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -222,28 +247,41 @@ export default function LessonPlan() {
             <h3 className="font-medium text-gray-800 mb-2">Examples</h3>
             <div className="space-y-4">
               {lessonPlan.examples.map((example, index) => (
-                <div key={index} className="border-l-4 border-blue-400 pl-4 py-1">
-                  <h4 className="font-medium text-gray-800">{example.section}</h4>
-                  
-                  {example.methods && example.methods.map((method, mIndex) => (
-                    <div key={mIndex} className="mt-2">
-                      <p className="text-sm font-medium text-blue-600">{method.name}</p>
-                      <ul className="list-disc pl-5 text-gray-700 space-y-1 mt-1 text-sm">
-                        {method.steps && method.steps.map((step, sIndex) => (
-                          <li key={sIndex}>{step}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                  
+                <div
+                  key={index}
+                  className="border-l-4 border-blue-400 pl-4 py-1"
+                >
+                  <h4 className="font-medium text-gray-800">
+                    {example.section}
+                  </h4>
+
+                  {example.methods &&
+                    example.methods.map((method, mIndex) => (
+                      <div key={mIndex} className="mt-2">
+                        <p className="text-sm font-medium text-blue-600">
+                          {method.name}
+                        </p>
+                        <ul className="list-disc pl-5 text-gray-700 space-y-1 mt-1 text-sm">
+                          {method.steps &&
+                            method.steps.map((step, sIndex) => (
+                              <li key={sIndex}>{step}</li>
+                            ))}
+                        </ul>
+                      </div>
+                    ))}
+
                   {example.executiveFunctionStrategy && (
                     <div className="mt-3 bg-gray-50 p-3 rounded-md">
-                      <p className="text-sm font-medium text-gray-700">{example.executiveFunctionStrategy.title}</p>
+                      <p className="text-sm font-medium text-gray-700">
+                        {example.executiveFunctionStrategy.title}
+                      </p>
                       <ul className="list-disc pl-5 text-gray-600 space-y-1 mt-1 text-sm">
-                        {example.executiveFunctionStrategy.strategies && 
-                         example.executiveFunctionStrategy.strategies.map((strategy, sIndex) => (
-                          <li key={sIndex}>{strategy}</li>
-                        ))}
+                        {example.executiveFunctionStrategy.strategies &&
+                          example.executiveFunctionStrategy.strategies.map(
+                            (strategy, sIndex) => (
+                              <li key={sIndex}>{strategy}</li>
+                            )
+                          )}
                       </ul>
                     </div>
                   )}
@@ -253,8 +291,8 @@ export default function LessonPlan() {
           </div>
         )}
       </div>
-    );
-  };
+    )
+  }
 
   return (
     <div className="p-4 mt-7 flex justify-center">
@@ -263,10 +301,11 @@ export default function LessonPlan() {
           Lesson Plan Generator
         </h1>
 
-        {/* Custom Dropdowns */}
-        {Object.entries(dropdowns).map(([name, data]) => (
-          <CustomDropdown key={name} name={name} data={data} />
-        ))}
+        {/* Custom Dropdowns - display in specific order */}
+        <CustomDropdown name="grade" data={dropdowns.grade} />
+        <CustomDropdown name="subject" data={dropdowns.subject} />
+        <CustomDropdown name="topic" data={dropdowns.topic} />
+        <CustomDropdown name="disorder" data={dropdowns.disorder} />
 
         {/* Error message */}
         {error && (
@@ -276,27 +315,49 @@ export default function LessonPlan() {
         )}
 
         {/* Submit Button */}
-        <button 
+        <button
           onClick={handleSubmit}
           disabled={isLoading}
           className={`w-full py-3 rounded-xl font-semibold transition shadow-lg flex items-center justify-center gap-2 
-            ${isLoading 
-              ? "bg-gray-400 text-white cursor-not-allowed" 
-              : "bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600"
+            ${
+              isLoading
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600'
             }`}
         >
-          <span>{isLoading ? "Generating..." : "Generate Lesson Plan"}</span>
+          <span>{isLoading ? 'Generating...' : 'Generate Lesson Plan'}</span>
           {!isLoading && <span className="text-xl">🚀</span>}
         </button>
-        
+
         {/* Output Card */}
         {showOutput && (
           <div className="mt-10 border border-gray-200 rounded-xl shadow-md p-6 bg-white">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">Generated Lesson Plan</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                Generated Lesson Plan
+              </h2>
+
+              {/* PDF Download Button */}
+              {lessonPlan && (
+                <button
+                  onClick={downloadPDF}
+                  disabled={isPdfLoading}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors 
+                    ${
+                      isPdfLoading
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
+                    }`}
+                >
+                  <Download size={16} />
+                  <span>{isPdfLoading ? 'Processing...' : 'Download PDF'}</span>
+                </button>
+              )}
             </div>
-            
-            {lessonPlan ? renderLessonPlan() : (
+
+            {lessonPlan ? (
+              renderLessonPlan()
+            ) : (
               <div className="text-center py-8 text-gray-500">
                 No lesson plan data available
               </div>
@@ -305,5 +366,5 @@ export default function LessonPlan() {
         )}
       </div>
     </div>
-  );
+  )
 }

@@ -22,13 +22,13 @@ CONTEXT 3 (Math-Specific Teaching Strategies):
 
 LLMs = {
     'llama':'meta-llama/llama-4-maverick:free',
-    'gemini':'google/gemini-2.0-flash-exp:free',
+    'gemini':'google/gemini-2.0-flash-thinking-exp:free',
     'deepseek':'deepseek/deepseek-r1-zero:free'
 }
 # SETUP — your persistent DB + OpenRouter
 openai.api_base = "https://openrouter.ai/api/v1"
 openai.api_key = os.getenv('LLM_KEY')
-llm_model = LLMs['gemini']  # Update this to your actual model on OpenRouter
+llm_model = LLMs['deepseek']  # Update this to your actual model on OpenRouter
 print("LLM_KEY:", os.getenv("LLM_KEY"))  # This should show the key (or None)
 
 # Executive Skill Map
@@ -60,9 +60,6 @@ def get_context(client):
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
 
-    print(f'lesson_collection{lesson_collection.peek()}')
-    print(f'exec_collection{exec_collection.peek()}')
-
     return lesson_collection, exec_collection
 
 
@@ -81,7 +78,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     disorder_key = disorder.lower()
     exec_skills = executive_skill_map.get(disorder_key, [])
     client = PersistentClient(
-    path="../chroma_store1"
+    path="./app/chroma_store1"
 )
 
     
@@ -100,11 +97,8 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
         include=["documents", "metadatas"]
     )
 
-    print(f'lesson  results--------------------------------------------------------------:\n{lesson_results}')
-    
-    
     lesson_context = "\n\n".join(lesson_results["documents"][0])
-    print(f'lesson_context:{lesson_context}')
+    print(f'\nlesson_context\n:{lesson_context}')
 
     # Get exec strategy chunks
     exec_contexts = []
