@@ -16,9 +16,10 @@ LLMs = {
 }
 # SETUP — your persistent DB + OpenRouter
 openai.api_base = "https://openrouter.ai/api/v1"
-openai.api_key = os.getenv('LLM_KEY')
+openai.api_key = "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"
 llm_model = LLMs['gemini']
-print("LLM_KEY:", os.getenv("LLM_KEY"))
+# print("LLM_KEY:", os.getenv("LLM_KEY"))
+
 
 # Executive Skill Map
 executive_skill_map = {
@@ -28,31 +29,29 @@ executive_skill_map = {
 }
 
 
-def get_context(client):
-    try:
-        icebreaker_collection = client.get_collection("icebreakers")
-    except Exception as e:
-        print(f"Error getting icebreakers collection: {e}")
-        # Create the collection
-        icebreaker_collection = client.create_collection(
-            name="icebreakers",
-            metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
-        )
+# def get_context(client):
+#     try:
+#         icebreaker_collection = client.get_collection("icebreakers")
+#     except Exception as e:
+#         print(f"Error getting icebreakers collection: {e}")
+#         icebreaker_collection = client.create_collection(
+#             name="icebreakers",
+#             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
+#         )
 
-    try:
-        exec_collection = client.get_collection("exec_skills")
-    except Exception as e:
-        print(f"Error getting exec_skills collection: {e}")
-        # Create the collection
-        exec_collection = client.create_collection(
-            name="exec_skills",
-            metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
-        )
+#     try:
+#         exec_collection = client.get_collection("exec_skills")
+#     except Exception as e:
+#         print(f"Error getting exec_skills collection: {e}")
+#         exec_collection = client.create_collection(
+#             name="exec_skills",
+#             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
+#         )
 
-    print(f'icebreaker_collection{icebreaker_collection.peek()}')
-    print(f'exec_collection{exec_collection.peek()}')
+#     print(f'icebreaker_collection{icebreaker_collection.peek()}')
+#     print(f'exec_collection{exec_collection.peek()}')
 
-    return icebreaker_collection, exec_collection
+#     return icebreaker_collection, exec_collection
 
 def retrieve_context_from_chroma_with_metadata(query, collection, embedder, k=4, materials_filter=None):
     query_embedding = embedder.encode([query]).tolist()[0]
@@ -118,15 +117,23 @@ def ask_question_rag(question, collection, embedder, materials_filter=None, k=4,
     return context
 
 def generate_icebreaker(question,materials, disorder):
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    CHROMA_PATH = os.path.join(os.path.dirname(BASE_DIR), "chroma_store1")
+
     disorder_key = disorder.lower()
     exec_skills = executive_skill_map.get(disorder_key, [])
-    client = PersistentClient(
-        path="../chroma_store1"
-    )
-    lesson_collection, exec_collection = get_context(client)
 
-    client = PersistentClient(path="native_chroma_icebreakers")
-    icebreaker_collection = get_context(client)
+    client = PersistentClient(path=CHROMA_PATH)
+
+    exec_collection = client.get_collection("exec_skills")
+
+    CHROMA_PATH = os.path.join(BASE_DIR, "icebreakers")
+
+    client = PersistentClient(path=CHROMA_PATH)
+    icebreaker_collection = client.get_collection("icebreakers")
+
+    # print(icebreaker_collection.peek())
+
     icebreaker_context = ask_question_rag(
         question=question,
         collection=icebreaker_collection,
@@ -151,11 +158,7 @@ def generate_icebreaker(question,materials, disorder):
         exec_contexts.extend(results["documents"][0])
     exec_context = "\n\n".join(exec_contexts)
 
-    print(f'exec_context--------------------------------------------------------------:\n{exec_context}')
-
-    prompt = build_prompt(exec_context,icebreaker_context,disorder.title())
-
-    # LLM call to OpenRouter
+    prompt = build_prompt(exec_context,icebreaker_context, question,disorder.title())
     response = openai.ChatCompletion.create(
         model=llm_model,
         messages=[
@@ -166,5 +169,5 @@ def generate_icebreaker(question,materials, disorder):
     llm_output = response.choices[0].message.content
 
     print("\n===== LLM OUTPUT =====\n")
-    print(llm_output)
+    # print(llm_output)
     return response.choices[0].message.content
