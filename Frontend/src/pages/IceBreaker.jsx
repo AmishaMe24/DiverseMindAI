@@ -1,6 +1,7 @@
-// IceBreaker.jsx
+// IceBreaker.jsx (updated rendering inline)
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 export default function IceBreaker() {
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -19,6 +20,55 @@ export default function IceBreaker() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lessonPlan, setLessonPlan] = useState(null);
+
+  function extractIcebreakerJson(raw) {
+    const result = {
+      title: '',
+      objective: '',
+      materials: '',
+      instructions: [],
+      questions: [],
+      debrief: [],
+      tips: [],
+      variations: []
+    };
+
+    const lines = raw.split(/\r?\n/).map(l => l.trim());
+    let section = null;
+
+    for (let line of lines) {
+      if (/^\*\*Title:\*\*/i.test(line)) {
+        section = 'title';
+        result.title = line.replace(/^\*\*Title:\*\*/i, '').trim();
+      } else if (/^\*\*Objective:\*\*/i.test(line)) {
+        section = 'objective';
+        result.objective = line.replace(/^\*\*Objective:\*\*/i, '').trim();
+      } else if (/^\*\*Materials Needed:\*\*/i.test(line)) {
+        section = 'materials';
+        result.materials = line.replace(/^\*\*Materials Needed:\*\*/i, '').trim();
+      } else if (/^\*\*Instructions:\*\*/i.test(line)) {
+        section = 'instructions';
+      } else if (/^Sample \"Would You Rather.*?\" Questions/i.test(line)) {
+        section = 'questions';
+      } else if (/^\*\*Debrief/i.test(line)) {
+        section = 'debrief';
+      } else if (/Tips for Success/i.test(line)) {
+        section = 'tips';
+      } else if (/Variations/i.test(line)) {
+        section = 'variations';
+      } else if (line.startsWith('*') || line.startsWith('-')) {
+        if (section && ['tips', 'variations'].includes(section)) {
+          result[section].push(line.replace(/^[-*]\s*/, ''));
+        }
+      } else if (line && section) {
+        if (['instructions', 'questions', 'debrief'].includes(section)) {
+          result[section].push(line);
+        }
+      }
+    }
+
+    return result;
+  }
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -65,6 +115,7 @@ export default function IceBreaker() {
         },
         body: JSON.stringify(requestBody),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.detail?.message || "Failed to fetch lesson plan");
@@ -79,6 +130,21 @@ export default function IceBreaker() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const renderList = (items, ordered = false) => {
+    const ListTag = ordered ? 'ol' : 'ul';
+    return (
+      <ListTag className={`${ordered ? 'list-decimal' : 'list-disc'} list-outside space-y-2 pl-6`}>
+        {items.map((item, i) => (
+          <li key={i} className="ml-1">
+            <span className="inline">
+              <ReactMarkdown components={{ p: ({ node, ...props }) => <span {...props} /> }}>{item}</ReactMarkdown>
+            </span>
+          </li>
+        ))}
+      </ListTag>
+    );
   };
 
   const CustomDropdown = ({ name, data }) => (
@@ -160,18 +226,27 @@ export default function IceBreaker() {
           {!isLoading && <span className="text-xl">🚀</span>}
         </button>
 
-        {showOutput && (
+        {showOutput && lessonPlan && (
           <div className="mt-10 border border-gray-200 rounded-xl shadow-md p-6 bg-white">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">Suggested Activity</h2>
-              <button onClick={() => setShowOutput(false)} className="text-gray-500 hover:text-gray-700">
-                ✕
-              </button>
+              <button onClick={() => setShowOutput(false)} className="text-gray-500 hover:text-gray-700">✕</button>
             </div>
-            <p className="text-gray-700">
-              {lessonPlan}
-              {/* "Two Truths and a Lie" adapted for students with {selected.disorder || "diverse needs"}. Helps break the ice while promoting memory and focus! */}
-            </p>
+            {(() => {
+              const content = extractIcebreakerJson(lessonPlan);
+              return (
+                <div className="space-y-6 text-gray-800 text-[15px] leading-relaxed">
+                  {content.title && <h3 className="text-2xl font-semibold text-blue-700">{content.title}</h3>}
+                  {content.objective && <section><h4 className="font-semibold text-lg">Objective</h4><p>{content.objective}</p></section>}
+                  {content.materials && <section><h4 className="font-semibold text-lg">Materials Needed</h4><p>{content.materials}</p></section>}
+                  {content.instructions.length > 0 && <section><h4 className="font-semibold text-lg">Instructions</h4>{renderList(content.instructions, true)}</section>}
+                  {content.questions.length > 0 && <section><h4 className="font-semibold text-lg">Sample Questions</h4>{renderList(content.questions)}</section>}
+                  {content.debrief.length > 0 && <section><h4 className="font-semibold text-lg">Debrief / Discussion Points</h4>{renderList(content.debrief)}</section>}
+                  {content.tips.length > 0 && <section><h4 className="font-semibold text-lg">Tips for Success</h4>{renderList(content.tips)}</section>}
+                  {content.variations.length > 0 && <section><h4 className="font-semibold text-lg">Variations</h4>{renderList(content.variations)}</section>}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>
