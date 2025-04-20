@@ -23,10 +23,17 @@ async def get_icebreaker_activity(request: IceBreakerRequest):
     Generate a lesson plan using the RAG pipeline based on the specified disorder, topic, grade level, and additional requirements.
     """
     try:
-        question = "Give me an icebreaker that requires no materials"
-        materials_filter = "No Materials are necessary for this activity."
+        question = "I want a team building activity for a stem group project"
+        materials_filter = "Include any sort of coloured papers"
         disorder="dyslexic"
         setting="In-Person"
+
+        # question = request.activity
+        # materials_filter = request.materials
+        # disorder=request.disorder
+        # setting=request.setting
+
+        print(question,materials_filter,disorder,setting)
 
         rag_text = generate_icebreaker(
             materials=materials_filter,

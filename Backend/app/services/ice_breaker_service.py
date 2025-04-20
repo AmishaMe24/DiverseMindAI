@@ -54,11 +54,11 @@ executive_skill_map = {
 #     return icebreaker_collection, exec_collection
 
 def retrieve_context_from_chroma_with_metadata(query, collection, embedder, k=4, materials_filter=None):
-    query_embedding = embedder.encode([query]).tolist()[0]
+    query_embedding = embedder.encode([query + materials_filter]).tolist()[0]
 
     chroma_filter = None
-    if materials_filter:
-        chroma_filter = {"materials_needed": {"$eq": materials_filter}}
+    # if materials_filter:
+    #     chroma_filter = {"materials_needed": {"$eq": materials_filter}}
 
     results = collection.query(
         query_embeddings=[query_embedding],
@@ -144,7 +144,7 @@ def generate_icebreaker(question,materials, disorder):
     )
 
 
-    # print(f'lesson_context:{lesson_context}')
+    print(f'icebreaker Context:{icebreaker_context}')
 
     # Get exec strategy chunks
     exec_contexts = []
