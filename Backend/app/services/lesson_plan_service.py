@@ -49,6 +49,8 @@ def get_context(client):
             name="lesson_plans",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
+    # for doc in lesson_collection.get()['metadatas']:
+    #     print(doc.get('grade'), doc.get('topic'))
 
     try:
         exec_collection = client.get_collection("exec_skills")
@@ -59,6 +61,7 @@ def get_context(client):
             name="exec_skills",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
+    print(f'\exec_collection--------------------------------------------------------------:\n:{exec_collection.peek()}')
 
     return lesson_collection, exec_collection
 
@@ -78,27 +81,25 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     disorder_key = disorder.lower()
     exec_skills = executive_skill_map.get(disorder_key, [])
     client = PersistentClient(
-    path="./app/chroma_store1"
+    path="./app/chroma_store"
 )
 
-    
     lesson_collection, exec_collection = get_context(client)
     # Get lesson chunks
     lesson_results = lesson_collection.query(
-        query_texts=[f"{topic} in {subject} for grade {grade}"],  # semantic hint
+        query_texts=[f"Lesson on {topic} under {subject} for grade {grade}"],  # semantic hint
         n_results=5,
         where={
             "$and": [
-                {"grade": str(grade).strip()},
-                {"subject": subject.strip()},
-                {"topic": topic.strip()}
+                {"grade": str(grade).strip()},       # could be "6" or "Algebra I"
+                {"subject": topic.strip()}
             ]
         },
         include=["documents", "metadatas"]
     )
 
     lesson_context = "\n\n".join(lesson_results["documents"][0])
-    print(f'\nlesson_context\n:{lesson_context}')
+    # print(f'\nlesson_context--------------------------------------------------------------:\n:{lesson_context}')
 
     # Get exec strategy chunks
     exec_contexts = []

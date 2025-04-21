@@ -46,7 +46,7 @@ executive_skill_map = {
 # file_path = os.path.abspath("")
 # Modify the ChromaDB client initialization part
 client = PersistentClient(
-    path="./app/chroma_store1"
+    path="./app/chroma_store"
 )
 
 # Get or create collections
@@ -76,13 +76,12 @@ def generate_assesment(grade, topic, subject, disorder):
     exec_skills = executive_skill_map.get(disorder_key, [])
     # Get lesson chunks
     lesson_results = lesson_collection.query(
-    query_texts=[f"{topic} in {subject} for grade {grade}"],  # semantic hint
+    query_texts=[f"Assesment for {topic} in {subject} for grade {grade}"],  # semantic hint
     n_results=5,
     where={
         "$and": [
-            {"grade": str(grade).strip()},
-            {"subject": subject.strip()},
-            {"topic": topic.strip()},
+            {"grade": str(grade).strip()},       # could be "6" or "Algebra I"
+            {"subject": topic.strip()},
             {"section": {"$in": ["intro_context", "instructional_steps"]}}
         ]
     },
@@ -95,9 +94,8 @@ def generate_assesment(grade, topic, subject, disorder):
     n_results=5,
     where={
         "$and": [
-            {"grade": str(grade).strip()},
-            {"subject": subject.strip()},
-            {"topic": topic.strip()},
+            {"grade": str(grade).strip()},       # could be "6" or "Algebra I"
+            {"subject": topic.strip()},
             {"section": "assessment"}
         ]
     },
@@ -105,6 +103,7 @@ def generate_assesment(grade, topic, subject, disorder):
 )
 
     lesson_assessment = "\n\n".join(lesson_results_assessment["documents"][0]) if lesson_results_assessment["documents"] else "No assessment found."
+    print(f'lesson assesment:------------------------------------------------------------------->\n{lesson_assessment}')
     
 
     # Get exec strategy chunks
