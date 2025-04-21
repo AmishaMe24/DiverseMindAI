@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { ChevronDown, Download } from 'lucide-react'
+import { Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import Select from 'react-select'
 import { downloadLessonPlanAsPDF } from '../utils/lessonPlanPdfGenerator'
 import dropdownData from '../data/dropdownData.json'
 
 export default function LessonPlan() {
-  const [openDropdown, setOpenDropdown] = useState(null)
-  const [hoveredOption, setHoveredOption] = useState(null)
   const [showOutput, setShowOutput] = useState(false)
-  const dropdownRef = useRef({})
   const pdfRef = useRef()
 
   // State for API response and loading/error states
@@ -73,33 +71,13 @@ export default function LessonPlan() {
     },
   }
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        openDropdown &&
-        dropdownRef.current[openDropdown] &&
-        !dropdownRef.current[openDropdown].contains(event.target)
-      ) {
-        setOpenDropdown(null)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [openDropdown])
-
-  // Toggle dropdown open/close
-  const toggleDropdown = (name) => {
-    setOpenDropdown(openDropdown === name ? null : name)
-  }
-
-  // Select an option
-  const selectOption = (dropdownName, value) => {
-    setSelected({ ...selected, [dropdownName]: value })
-    setOpenDropdown(null)
+  // Handle select change
+  const handleSelectChange = (selectedOption, actionMeta) => {
+    const { name } = actionMeta
+    setSelected(prev => ({
+      ...prev,
+      [name]: selectedOption ? selectedOption.value : ''
+    }))
   }
 
   // Handle form submission
@@ -154,61 +132,42 @@ export default function LessonPlan() {
     }
   }
 
-  // Custom dropdown component
-  const CustomDropdown = ({ name, data }) => (
-    <div className="mb-7 relative">
-      <label className="block mb-3 text-sm font-medium text-gray-700">
-        {data.label}
-      </label>
-      <div className="relative" ref={(el) => (dropdownRef.current[name] = el)}>
-        <button
-          onClick={() => toggleDropdown(name)}
-          className="flex items-center justify-between w-full p-3 text-left border bg-white border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
-        >
-          <span className={selected[name] ? 'text-gray-800' : 'text-gray-500'}>
-            {data.options.find((option) => option.value === selected[name])
-              ?.label || 'Select...'}
-          </span>
-          <ChevronDown
-            className={`text-gray-500 transition-transform duration-200 ${
-              openDropdown === name ? 'transform rotate-180' : ''
-            }`}
-            size={18}
-          />
-        </button>
-
-        {/* Dropdown menu */}
-        {openDropdown === name && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 max-h-60 overflow-auto">
-            <div className="sticky top-0 bg-gray-50 px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
-              {hoveredOption?.startsWith(name)
-                ? hoveredOption.split('-')[1]
-                : 'Select an option'}
-            </div>
-            {data.options.map(({ label, value }) => (
-              <div
-                key={value}
-                onClick={() => selectOption(name, value)}
-                onMouseEnter={() => setHoveredOption(`${name}-${value}`)}
-                onMouseLeave={() => setHoveredOption(null)}
-                className={`px-4 py-2 cursor-pointer transition-colors duration-150 
-                  ${
-                    hoveredOption === `${name}-${value}`
-                      ? 'bg-blue-100 text-blue-700'
-                      : selected[name] === value
-                      ? 'bg-blue-50 text-blue-600 font-medium'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-              >
-                {label}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
+  // Custom styles for React Select
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
+      boxShadow: state.isFocused ? '0 0 0 2px #bfdbfe' : 'none',
+      '&:hover': {
+        borderColor: '#3b82f6',
+      },
+      padding: '2px',
+      borderRadius: '0.5rem',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected 
+        ? '#eff6ff' 
+        : state.isFocused 
+          ? '#dbeafe' 
+          : null,
+      color: state.isSelected ? '#2563eb' : '#374151',
+      fontWeight: state.isSelected ? '500' : '400',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#bfdbfe',
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      borderRadius: '0.5rem',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: '#9ca3af',
+    }),
+  }
 
   // Function to handle PDF download - simplified to use the utility
   const downloadPDF = () => {
@@ -301,11 +260,80 @@ export default function LessonPlan() {
           Lesson Plan Generator
         </h1>
 
-        {/* Custom Dropdowns - display in specific order */}
-        <CustomDropdown name="grade" data={dropdowns.grade} />
-        <CustomDropdown name="subject" data={dropdowns.subject} />
-        <CustomDropdown name="topic" data={dropdowns.topic} />
-        <CustomDropdown name="disorder" data={dropdowns.disorder} />
+        {/* React Select Dropdowns */}
+        <div className="mb-7">
+          <label className="block mb-3 text-sm font-medium text-gray-700">
+            {dropdowns.grade.label}
+          </label>
+          <Select
+            name="grade"
+            options={dropdowns.grade.options}
+            value={dropdowns.grade.options.find(option => option.value === selected.grade) || null}
+            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'grade' })}
+            placeholder="Select grade level..."
+            isClearable={false}
+            isSearchable={true}
+            styles={customStyles}
+            className="react-select-container"
+            classNamePrefix="react-select"
+          />
+        </div>
+        
+        <div className="mb-7">
+          <label className="block mb-3 text-sm font-medium text-gray-700">
+            {dropdowns.subject.label}
+          </label>
+          <Select
+            name="subject"
+            options={dropdowns.subject.options}
+            value={dropdowns.subject.options.find(option => option.value === selected.subject) || null}
+            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'subject' })}
+            placeholder="Select subject..."
+            isClearable={false}
+            isSearchable={true}
+            isDisabled={!selected.grade}
+            styles={customStyles}
+            className="react-select-container"
+            classNamePrefix="react-select"
+          />
+        </div>
+        
+        <div className="mb-7">
+          <label className="block mb-3 text-sm font-medium text-gray-700">
+            {dropdowns.topic.label}
+          </label>
+          <Select
+            name="topic"
+            options={dropdowns.topic.options}
+            value={dropdowns.topic.options.find(option => option.value === selected.topic) || null}
+            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'topic' })}
+            placeholder="Select topic..."
+            isClearable={false}
+            isSearchable={true}
+            isDisabled={!selected.subject}
+            styles={customStyles}
+            className="react-select-container"
+            classNamePrefix="react-select"
+          />
+        </div>
+        
+        <div className="mb-7">
+          <label className="block mb-3 text-sm font-medium text-gray-700">
+            {dropdowns.disorder.label}
+          </label>
+          <Select
+            name="disorder"
+            options={dropdowns.disorder.options}
+            value={dropdowns.disorder.options.find(option => option.value === selected.disorder) || null}
+            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'disorder' })}
+            placeholder="Select accommodation..."
+            isClearable={false}
+            isSearchable={true}
+            styles={customStyles}
+            className="react-select-container"
+            classNamePrefix="react-select"
+          />
+        </div>
 
         {/* Error message */}
         {error && (
