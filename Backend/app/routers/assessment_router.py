@@ -7,11 +7,10 @@ router = APIRouter()
 
 # Request schema
 class AssessmentRequest(BaseModel):
+    subject: str = Field(..., description="Subject for the assessment")
     disorder: str = Field(..., description="Learning disorder or condition to address")
     topic: str = Field(..., description="Mathematical topic for the assessment")
     grade: str = Field(..., description="Grade level for the assessment")
-    additional_info: Optional[str] = Field(None, description="Additional information or requirements")
-    prompt: str = Field(..., description="Main prompt for assessment generation")
 
 # Response schema
 class AssessmentResponse(BaseModel):
@@ -27,11 +26,10 @@ async def get_assessment(request: AssessmentRequest):
     topic, grade level, and additional requirements.
     """
     try:
-        # For now, we'll use hardcoded values to ensure compatibility with existing data
-        subject = 'Number and Number Sense'
-        topic = 'Reading, writing, and identifying the place value of six-digit numerals'
-        grade = '3'
-        disorder = 'dyscalculia'
+        subject = request.subject
+        topic = request.topic
+        grade = request.grade
+        disorder = request.disorder
 
         # Call the RAG pipeline
         assessment_text = generate_assesment(
