@@ -118,7 +118,7 @@ def ask_question_rag(question, collection, embedder, materials_filter=None, k=4,
 
 def generate_icebreaker(question,materials, disorder):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    CHROMA_PATH = os.path.join(os.path.dirname(BASE_DIR), "chroma_store1")
+    CHROMA_PATH = os.path.join(os.path.dirname(BASE_DIR), "chroma_store")
 
     disorder_key = disorder.lower()
     exec_skills = executive_skill_map.get(disorder_key, [])

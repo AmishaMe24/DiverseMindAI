@@ -61,7 +61,7 @@ def get_context(client):
             name="exec_skills",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
-    print(f'\exec_collection--------------------------------------------------------------:\n:{exec_collection.peek()}')
+    print(f'\n exec_collection--------------------------------------------------------------:\n:{exec_collection.peek()}')
 
     return lesson_collection, exec_collection
 
