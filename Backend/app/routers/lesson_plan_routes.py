@@ -29,8 +29,8 @@ async def get_lesson_plan(request: LessonPlanRequest):
     Generate a lesson plan using the RAG pipeline based on the specified disorder, topic, grade level, and additional requirements.
     """
     try:
-        # subject = 'Number and Number Sense'
-        # topic = 'Reading, writing, and identifying the place value of six-digit numerals'
+        # subject = 'Measurement and Geometry'
+        # topic = 'Money Counts'
         # grade = '3'
         # disorder = 'dyscalculia'
         
