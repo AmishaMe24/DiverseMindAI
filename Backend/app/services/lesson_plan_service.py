@@ -49,6 +49,8 @@ def get_context(client):
             name="lesson_plans",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
+    print(f'\n lesson collection--------------------------------------------------------------:\n:{lesson_collection.peek()}')
+    
     # for doc in lesson_collection.get()['metadatas']:
     #     print(doc.get('grade'), doc.get('topic'))
 

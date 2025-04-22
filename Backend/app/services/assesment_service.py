@@ -149,5 +149,8 @@ CONTEXT 3 (Executive Function Strategies for {disorder.title()}):
             {"role": "user", "content": prompt}
         ]
     )
+    llm_output = response.choices[0].message.content
 
+    print("\n===== LLM OUTPUT =====\n")
+    print(llm_output)
     return response.choices[0].message.content
