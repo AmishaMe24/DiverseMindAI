@@ -49,6 +49,8 @@ def get_context(client):
             name="lesson_plans",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
+    print(f'\n lesson collection--------------------------------------------------------------:\n:{lesson_collection.peek()}')
+    
     # for doc in lesson_collection.get()['metadatas']:
     #     print(doc.get('grade'), doc.get('topic'))
 
@@ -61,7 +63,7 @@ def get_context(client):
             name="exec_skills",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
-    print(f'\exec_collection--------------------------------------------------------------:\n:{exec_collection.peek()}')
+    print(f'\n exec_collection--------------------------------------------------------------:\n:{exec_collection.peek()}')
 
     return lesson_collection, exec_collection
 

@@ -4,8 +4,14 @@ import { marked } from 'marked'
 export const markdownToHtml = (markdown) => {
   if (!markdown) return ''
   try {
+    // First, process the markdown to wrap Executive Function Strategy sections
+    let processedMarkdown = markdown.replace(
+      /(\*\*Executive Function Strategy.*?\*\*)([\s\S]*?)(?=\n\n|\n####|\n###|\n##|\n#|$)/g,
+      '<div class="executive-strategy">$1$2</div>'
+    );
+    
     // Use marked to convert markdown to HTML
-    return marked.parse(markdown)
+    return marked.parse(processedMarkdown)
   } catch (error) {
     console.error('Error parsing markdown:', error)
     // Fallback to simple formatting if marked fails
@@ -110,8 +116,37 @@ const getPdfStyles = () => {
       p {
         margin-bottom: 12px;
       }
+      /* Enhanced styling for Executive Function Strategy sections */
       strong {
         color: #1e40af;
+        font-weight: bold;
+      }
+      
+      /* Target Executive Function Strategy sections specifically */
+      p:contains("Executive Function Strategy"), 
+      li:contains("Executive Function Strategy"),
+      strong:contains("Executive Function Strategy") {
+        background-color: #dbeafe;
+        padding: 8px 12px;
+        border-radius: 5px;
+        border-left: 4px solid #3b82f6;
+        margin: 10px 0;
+        font-weight: bold;
+      }
+      
+      /* Additional style to make ** content bold */
+      .lesson-plan-content strong {
+        font-weight: bold;
+        color: #1e40af;
+      }
+      
+      /* Style for the Executive Function Strategy content */
+      .executive-strategy {
+        background-color: #dbeafe;
+        padding: 10px 15px;
+        border-radius: 5px;
+        border-left: 4px solid #3b82f6;
+        margin: 10px 0;
       }
       .lesson-plan-content {
         background-color: #f9fafb;
@@ -260,73 +295,87 @@ const generateHeaderInfo = (lessonPlan, selected, dropdowns) => {
 
 // Main function to download lesson plan as PDF
 export const downloadLessonPlanAsPDF = (lessonPlan, selected, dropdowns, setIsPdfLoading) => {
+  console.log("Downloading PDF")
   if (!lessonPlan) return
 
   setIsPdfLoading(true)
 
   try {
+    // Clean up the lesson plan text by removing \boxed{ and } markers
+    const cleanLessonPlan = lessonPlan.lessonPlan.replace(/\\boxed\{|\}/g, "")
+    
     // Convert lesson plan markdown to HTML
-    const lessonPlanHtml = markdownToHtml(lessonPlan.lessonPlan)
+    const lessonPlanHtml = markdownToHtml(cleanLessonPlan)
 
     // Use browser's print functionality to save as PDF
     const printWindow = window.open('', '_blank')
 
-    if (printWindow) {
-      // Get PDF styles
-      const printStyles = getPdfStyles()
+    if (!printWindow) {
+      throw new Error('Popup blocked. Please allow popups for this site to download the PDF.')
+    }
 
-      // Create title for the PDF
-      const titleText = lessonPlan.lessonName || 'Generated Lesson Plan'
+    // Get PDF styles
+    const printStyles = getPdfStyles()
 
-      // Prepare header content with metadata
-      const headerInfo = generateHeaderInfo(lessonPlan, selected, dropdowns)
+    // Create title for the PDF
+    const titleText = lessonPlan.lessonName || 'Generated Lesson Plan'
 
-      // Format examples for PDF
-      const examplesHtml = generateExamplesHtml(lessonPlan.examples)
+    // Prepare header content with metadata
+    const headerInfo = generateHeaderInfo(lessonPlan, selected, dropdowns)
 
-      // Create the print document
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>${titleText}</title>
-          ${printStyles}
-        </head>
-        <body>
-          ${headerInfo}
-          
-          <div class="section">
-            <h2>Concept</h2>
-            <div class="concept">${lessonPlan.concept || ''}</div>
+    // Format examples for PDF
+    const examplesHtml = generateExamplesHtml(lessonPlan.examples)
+
+    // Create the print document
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${titleText}</title>
+        ${printStyles}
+        <script>
+          // Force print dialog to appear after content is loaded
+          window.onload = function() {
+            setTimeout(function() {
+              window.print();
+              setTimeout(function() {
+                window.close();
+              }, 500);
+            }, 1000);
+          }
+        </script>
+      </head>
+      <body>
+        ${headerInfo}
+        
+        <div class="section">
+          <h2>Concept</h2>
+          <div class="concept">${lessonPlan.concept || ''}</div>
+        </div>
+        
+        <div class="section">
+          <h2>Lesson Plan</h2>
+          <div class="lesson-plan-content">
+            ${lessonPlanHtml}
           </div>
-          
-          <div class="section">
-            <h2>Lesson Plan</h2>
-            <div class="lesson-plan-content">
-              ${lessonPlanHtml}
-            </div>
-          </div>
-          
-          ${examplesHtml}
-        </body>
-        </html>
-      `)
+        </div>
+        
+        ${examplesHtml}
+      </body>
+      </html>
+    `)
 
-      printWindow.document.close()
-
-      // Wait for content to load
-      printWindow.onload = function () {
-        printWindow.focus()
-        printWindow.print()
-        printWindow.close()
+    printWindow.document.close()
+    
+    // Add a fallback in case onload doesn't trigger
+    setTimeout(() => {
+      if (setIsPdfLoading) {
         setIsPdfLoading(false)
       }
-    } else {
-      throw new Error('Could not open print window')
-    }
+    }, 10000) // 10 second timeout
   } catch (err) {
     console.error('Error generating PDF:', err)
-    alert('There was a problem generating the PDF. Please try again.')
+    alert('There was a problem generating the PDF: ' + err.message)
     setIsPdfLoading(false)
   }
 }
