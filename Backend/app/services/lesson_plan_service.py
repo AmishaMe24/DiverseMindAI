@@ -144,7 +144,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     Each section should include
     - Method
     - Activities
-    - Executive Function Strategy
+    - Executive Function Strategy - [Mention strategy/skill name and how it's being applied here]
     """
 
     print("\n===== LLM INPUT PROMPT =====\n")
@@ -153,7 +153,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     # LLM call to OpenRouter
     response = openai.ChatCompletion.create(
         model=llm_model,
-        messages=[
+        messages=[                              
             {"role": "system", "content": "You are a supportive and creative educational assistant."},
             {"role": "user", "content": prompt}
         ]

@@ -26,7 +26,7 @@ export default function MainFeature() {
         </svg>
 
         {/* Left side - Image placeholder */}
-        <div className="w-full md:w-1/2 p-8 relative z-10">
+        <div className="w-full md:w-1/2 p-10 relative z-10">
           <div className="bg-blue-700/30 h-96 w-full flex items-center justify-center rounded-lg border border-blue-600/30 backdrop-blur-sm overflow-hidden">
             <img
               src={featureImage}
@@ -41,12 +41,12 @@ export default function MainFeature() {
           <div className="max-w-md">
             <p className="text-blue-300 font-medium mb-2">Empower</p>
             <h2 className="text-4xl font-bold mb-4 text-white">
-              Transforming Education for Neurodiverse Learners
+              Transforming Education for Exceptional Learners
             </h2>
             <p className="text-blue-100 mb-8">
               At DiverseMind AI, we are dedicated to creating inclusive
               educational experiences. Our platform harnesses the power of AI to
-              support neurodiverse students in their learning journey.
+              support exceptional students in their learning journey.
             </p>
 
             <div className="grid grid-cols-2 gap-8 mb-8">
@@ -101,18 +101,6 @@ export default function MainFeature() {
                   retention.
                 </p>
               </div>
-            </div>
-
-            <div className="flex gap-4">
-              <a
-                href="#"
-                className="border border-white text-white px-5 py-2 rounded-md font-medium hover:bg-blue-700"
-              >
-                Learn More
-              </a>
-              <a href="#" className="text-white font-medium flex items-center">
-                Sign Up <span className="ml-1">→</span>
-              </a>
             </div>
           </div>
         </div>

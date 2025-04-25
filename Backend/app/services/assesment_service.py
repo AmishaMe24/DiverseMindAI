@@ -28,7 +28,7 @@ LLMs = {
 # SETUP — your persistent DB + OpenRouter
 openai.api_base = "https://openrouter.ai/api/v1"
 openai.api_key = os.getenv('LLM_KEY')
-llm_model = LLMs['gemini']  # Update this to your actual model on OpenRouter
+llm_model = LLMs['llama']  # Update this to your actual model on OpenRouter
 
 
 # Executive Skill Map

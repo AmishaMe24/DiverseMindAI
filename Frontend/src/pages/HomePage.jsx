@@ -1,7 +1,4 @@
 import React from 'react'
-import { Button } from '../components/features/button'
-import { Card, CardContent } from '../components/features/card'
-import { CheckCircle, Users, Star, Check } from 'lucide-react'
 import Hero from '../components/Hero';
 import MainFeature from '../components/MainFeature';
 import Features from '../components/Features';
@@ -15,7 +12,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white text-gray-900">
       <Hero />
       <MainFeature />
-      <Features features={features} />
+      <Features />
       <CTASection />
       <Testimonials testimonials={testimonials} />
       <FAQSection faqs={faqs} />
@@ -23,24 +20,6 @@ export default function HomePage() {
     </div>
   )
 }
-
-const features = [
-  {
-    title: 'Adaptive Lesson Plans',
-    description: 'Create personalized curriculum tailored for neurodiverse students with just a few clicks.',
-    icon: CheckCircle,
-  },
-  {
-    title: 'Engaging Activities',
-    description: 'Generate interactive learning tools designed to enhance comprehension for all learning styles.',
-    icon: Users,
-  },
-  {
-    title: 'Validated Success',
-    description: 'Our platform is backed by educational experts and real-world data to ensure effectiveness.',
-    icon: Star,
-  },
-]
 
 const testimonials = [
   {
@@ -76,13 +55,5 @@ const faqs = [
   {
     question: "Is my data secure?",
     answer: "Absolutely. We use enterprise-grade encryption and follow strict privacy protocols to protect all user data."
-  },
-  {
-    question: "Do you offer training for teachers?",
-    answer: "Yes, we provide free onboarding sessions and regular webinars to help teachers maximize the platform."
-  },
-  {
-    question: "Can I try before I buy?",
-    answer: "Yes! We offer a 14-day free trial with full access to all features so you can see the impact firsthand."
   }
 ]
