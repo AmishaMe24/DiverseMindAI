@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Download } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
+import React, { useState, useEffect } from 'react'
 import Select from 'react-select'
-import { downloadLessonPlanAsPDF } from '../utils/lessonPlanPdfGenerator'
+import LessonPlanOutput from '../components/LessonPlanOutput'
 import dropdownData from '../data/dropdownData.json'
+import { formatLessonPlanOutput } from '../utils/lessonPlanFormatter';
 
 export default function LessonPlan() {
   const [showOutput, setShowOutput] = useState(false)
-  const pdfRef = useRef()
 
   // State for API response and loading/error states
   const [lessonPlan, setLessonPlan] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isPdfLoading, setIsPdfLoading] = useState(false)
   const [error, setError] = useState(null)
 
   // State for selected values
@@ -121,9 +118,15 @@ export default function LessonPlan() {
         )
       }
 
-      const data = await response.json()
-      setLessonPlan(data)
-      setShowOutput(true)
+      const data = await response.json();
+      
+      // Format the lesson plan text if it exists
+      if (data && data.lessonPlan) {
+        data.lessonPlan = formatLessonPlanOutput(data.lessonPlan);
+      }
+      
+      setLessonPlan(data);
+      setShowOutput(true);
     } catch (err) {
       setError(err.message || 'An unexpected error occurred')
       console.error('Error fetching lesson plan:', err)
@@ -169,90 +172,6 @@ export default function LessonPlan() {
     }),
   }
 
-  // Function to handle PDF download - simplified to use the utility
-  const downloadPDF = () => {
-    downloadLessonPlanAsPDF(lessonPlan, selected, dropdowns, setIsPdfLoading)
-  }
-
-  // Render lesson plan from API response
-  const renderLessonPlan = () => {
-    if (!lessonPlan) return null
-
-    return (
-      <div id="lesson-plan-content" className="space-y-6" ref={pdfRef}>
-        <div>
-          <h3 className="font-medium text-gray-800 mb-1">Lesson Title</h3>
-          <p className="text-gray-700">{lessonPlan.lessonName}</p>
-        </div>
-
-        <div>
-          <h3 className="font-medium text-gray-800 mb-1">Concept</h3>
-          <p className="text-gray-700">{lessonPlan.concept}</p>
-        </div>
-
-        {/* Display the raw lesson plan text as markdown */}
-        {lessonPlan.lessonPlan && (
-          <div>
-            <h3 className="font-medium text-gray-800 mb-2">Lesson Plan</h3>
-            <div className="prose prose-sm max-w-none p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <ReactMarkdown>{lessonPlan.lessonPlan}</ReactMarkdown>
-            </div>
-          </div>
-        )}
-
-        {/* Render examples if they exist in the structured format */}
-        {lessonPlan.examples && lessonPlan.examples.length > 0 && (
-          <div>
-            <h3 className="font-medium text-gray-800 mb-2">Examples</h3>
-            <div className="space-y-4">
-              {lessonPlan.examples.map((example, index) => (
-                <div
-                  key={index}
-                  className="border-l-4 border-blue-400 pl-4 py-1"
-                >
-                  <h4 className="font-medium text-gray-800">
-                    {example.section}
-                  </h4>
-
-                  {example.methods &&
-                    example.methods.map((method, mIndex) => (
-                      <div key={mIndex} className="mt-2">
-                        <p className="text-sm font-medium text-blue-600">
-                          {method.name}
-                        </p>
-                        <ul className="list-disc pl-5 text-gray-700 space-y-1 mt-1 text-sm">
-                          {method.steps &&
-                            method.steps.map((step, sIndex) => (
-                              <li key={sIndex}>{step}</li>
-                            ))}
-                        </ul>
-                      </div>
-                    ))}
-
-                  {example.executiveFunctionStrategy && (
-                    <div className="mt-3 bg-gray-50 p-3 rounded-md">
-                      <p className="text-sm font-medium text-gray-700">
-                        {example.executiveFunctionStrategy.title}
-                      </p>
-                      <ul className="list-disc pl-5 text-gray-600 space-y-1 mt-1 text-sm">
-                        {example.executiveFunctionStrategy.strategies &&
-                          example.executiveFunctionStrategy.strategies.map(
-                            (strategy, sIndex) => (
-                              <li key={sIndex}>{strategy}</li>
-                            )
-                          )}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   return (
     <div className="p-4 mt-7 flex justify-center">
       <div className="w-full ml-[14%] bg-white rounded-2xl shadow-lg p-8">
@@ -260,137 +179,80 @@ export default function LessonPlan() {
           Lesson Plan Generator
         </h1>
 
-        {/* React Select Dropdowns */}
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            {dropdowns.grade.label}
-          </label>
-          <Select
-            name="grade"
-            options={dropdowns.grade.options}
-            value={dropdowns.grade.options.find(option => option.value === selected.grade) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'grade' })}
-            placeholder="Select grade level..."
-            isClearable={false}
-            isSearchable={true}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
-        </div>
-        
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            {dropdowns.subject.label}
-          </label>
-          <Select
-            name="subject"
-            options={dropdowns.subject.options}
-            value={dropdowns.subject.options.find(option => option.value === selected.subject) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'subject' })}
-            placeholder="Select subject..."
-            isClearable={false}
-            isSearchable={true}
-            isDisabled={!selected.grade}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
-        </div>
-        
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            {dropdowns.topic.label}
-          </label>
-          <Select
-            name="topic"
-            options={dropdowns.topic.options}
-            value={dropdowns.topic.options.find(option => option.value === selected.topic) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'topic' })}
-            placeholder="Select topic..."
-            isClearable={false}
-            isSearchable={true}
-            isDisabled={!selected.subject}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
-        </div>
-        
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            {dropdowns.disorder.label}
-          </label>
-          <Select
-            name="disorder"
-            options={dropdowns.disorder.options}
-            value={dropdowns.disorder.options.find(option => option.value === selected.disorder) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'disorder' })}
-            placeholder="Select accommodation..."
-            isClearable={false}
-            isSearchable={true}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
+        {/* Form section - Modified to have one dropdown per row */}
+        <div className="flex flex-col gap-6 mb-8">
+          {Object.entries(dropdowns).map(([name, data]) => (
+            <div key={name} className="mb-2">
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                {data.label}
+              </label>
+              <Select
+                name={name}
+                options={data.options}
+                value={
+                  selected[name]
+                    ? { value: selected[name], label: selected[name] }
+                    : null
+                }
+                onChange={handleSelectChange}
+                placeholder={`Select ${data.label.toLowerCase()}...`}
+                isClearable
+                isSearchable
+                styles={customStyles}
+              />
+            </div>
+          ))}
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-            {error}
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+            <p>{error}</p>
           </div>
         )}
 
-        {/* Submit Button */}
+        {/* Generate button */}
         <button
           onClick={handleSubmit}
           disabled={isLoading}
-          className={`w-full py-3 rounded-xl font-semibold transition shadow-lg flex items-center justify-center gap-2 
-            ${
-              isLoading
-                ? 'bg-gray-400 text-white cursor-not-allowed'
-                : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600'
-            }`}
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-600 transition shadow-lg flex items-center justify-center gap-2"
         >
-          <span>{isLoading ? 'Generating...' : 'Generate Lesson Plan'}</span>
-          {!isLoading && <span className="text-xl">🚀</span>}
+          {isLoading ? (
+            <>
+              <svg
+                className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Generating...
+            </>
+          ) : (
+            'Generate Lesson Plan 🚀'
+          )}
         </button>
 
-        {/* Output Card */}
-        {showOutput && (
-          <div className="mt-10 border border-gray-200 rounded-xl shadow-md p-6 bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">
-                Generated Lesson Plan
-              </h2>
-
-              {/* PDF Download Button */}
-              {lessonPlan && (
-                <button
-                  onClick={downloadPDF}
-                  disabled={isPdfLoading}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors 
-                    ${
-                      isPdfLoading
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                    }`}
-                >
-                  <Download size={16} />
-                  <span>{isPdfLoading ? 'Processing...' : 'Download PDF'}</span>
-                </button>
-              )}
-            </div>
-
-            {lessonPlan ? (
-              renderLessonPlan()
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No lesson plan data available
-              </div>
-            )}
-          </div>
+        {/* Output section */}
+        {showOutput && lessonPlan && (
+          <LessonPlanOutput 
+            lessonPlan={lessonPlan} 
+            selected={selected} 
+            dropdowns={dropdowns} 
+          />
         )}
       </div>
     </div>

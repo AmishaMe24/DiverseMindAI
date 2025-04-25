@@ -4,6 +4,8 @@ import ReactMarkdown from 'react-markdown'
 import Select from 'react-select' // Import React Select
 import { downloadQuizAsPDF } from '../utils/quizMakerPdfGenerator'
 import dropdownData from '../data/dropdownData'
+import { formatAssessmentOutput } from '../utils/assessmentFormatter';
+
 
 export default function QuizMaker() {
   const [showOutput, setShowOutput] = useState(false)
@@ -130,9 +132,28 @@ export default function QuizMaker() {
         )
       }
 
-      const data = await response.json()
-      setAssessment(data)
-      setShowOutput(true)
+      // Inside handleSubmit function
+      const data = await response.json();
+      
+      // Format the assessment data
+      let cleanedAssessment;
+      if (typeof data === 'string') {
+        // If the API returns a string
+        cleanedAssessment = formatAssessmentOutput(data);
+        setAssessment({ assessment: cleanedAssessment });
+      } else if (typeof data === 'object' && data !== null) {
+        // If the API returns an object
+        if (typeof data.assessment === 'string') {
+          // Clean the assessment text
+          data.assessment = formatAssessmentOutput(data.assessment);
+          cleanedAssessment = data;
+        } else {
+          cleanedAssessment = data;
+        }
+        setAssessment(cleanedAssessment);
+      }
+      
+      setShowOutput(true);
     } catch (err) {
       setError(err.message || 'An unexpected error occurred')
       console.error('Error fetching assessment:', err)
