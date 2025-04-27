@@ -20,31 +20,10 @@ CONTEXT 3 (Math-Specific Teaching Strategies):
 - Connect concepts like division and fractions to place value
 """
 
-LLMs = {
-    'llama':'meta-llama/llama-4-maverick:free',
-    'gemini':'google/gemini-2.0-flash-exp:free',
-    'deepseek':'deepseek/deepseek-r1-zero:free'
-}
 # SETUP — your persistent DB + OpenRouter
-openai.api_base = "https://openrouter.ai/api/v1"
-openai.api_key = os.getenv('LLM_KEY')
-llm_model = LLMs['llama']  # Update this to your actual model on OpenRouter
+openai.api_key = os.getenv('OPENAI_API_KEY')  # Must be your OpenAI API Key now
+print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))  # For debug, remove in production
 
-
-# Executive Skill Map
-executive_skill_map = {
-    "dyscalculia": ["Enhancing Working Memory", "Cultivating Metacognition", "Fostering Organization", "Promoting, Planning, and Prioritizing"],
-    "dyslexia": ["Task Initiation", "Sustained Attention", "Metacognition", "Organization"],
-    "autism": ["Emotional Control", "Flexibility", "Goal-Directed Persistence", "Time Management"]
-}
-
-
-
-# FUNCTION: Generate the augmented lesson plan
-# Load ChromaDB collections
-
-# file_path = os.path.abspath("")
-# Modify the ChromaDB client initialization part
 client = PersistentClient(
     path="./app/chroma_store"
 )
@@ -71,9 +50,7 @@ except Exception as e:
     )
     
 # FUNCTION: Generate the augmented lesson plan
-def generate_assesment(grade, topic, subject, disorder):
-    disorder_key = disorder.lower()
-    exec_skills = executive_skill_map.get(disorder_key, [])
+def generate_assesment(grade, topic, subject, exec_skills):
     # Get lesson chunks
     lesson_results = lesson_collection.query(
     query_texts=[f"Assesment for {topic} in {subject} for grade {grade}"],  # semantic hint
@@ -126,7 +103,7 @@ You are an expert educational support assistant helping special education teache
 
 Your task is to improve or redesign the assessment tasks provided in CONTEXT 2 so they:
 - Align closely with the instructional content in CONTEXT 1.
-- Apply evidence-based executive functioning strategies from CONTEXT 3, specifically for students with {disorder.title()}.
+- Apply evidence-based executive functioning strategies from {exec_skills}.
 - Are accessible, scaffolded, and support cognitive challenges such as working memory, attention, planning, and self-monitoring.
 - Use a variety of assessment types (e.g., visual aids, scaffolded steps, short responses).
 - After each assessment question, include a short explanation of how the design supports executive functioning needs.
@@ -137,17 +114,19 @@ CONTEXT 1 (Lesson Plan):
 CONTEXT 2 (Original Assessment Questions):
 {lesson_assessment}
 
-CONTEXT 3 (Executive Function Strategies for {disorder.title()}):
+CONTEXT 3 (Executive Function Strategies : {exec_skills}):
 {exec_context}
 """
 
     # LLM call to OpenRouter
     response = openai.ChatCompletion.create(
-        model=llm_model,
+        model="gpt-4o",   # <- GPT-4o model name
         messages=[
             {"role": "system", "content": "You are a supportive and creative educational assistant."},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        temperature=0.7,
+        max_tokens=3000
     )
     llm_output = response.choices[0].message.content
 

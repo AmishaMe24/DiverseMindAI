@@ -11,9 +11,10 @@ router = APIRouter()
 # Request schema
 class LessonPlanRequest(BaseModel):
     subject: str = Field(..., description="Subject for the lesson plan")
-    disorder: str = Field(..., description="Learning disorder or condition to address")
     topic: str = Field(..., description="Mathematical topic for the lesson")
     grade: str = Field(..., description="Grade level for the lesson")
+    exec_skills: Optional[List[str]] = Field(default_factory=list, description="List of executive skills to address")
+
 
 # Response schema
 class LessonPlanResponse(BaseModel):
@@ -39,16 +40,16 @@ async def get_lesson_plan(request: LessonPlanRequest):
         subject = request.subject
         topic = request.topic
         grade = request.grade
-        disorder = request.disorder
+        exec_skills = request.exec_skills
         
-        print("From request param", subject, topic, grade, disorder)
+        print("From request param", subject, topic, grade, exec_skills)
 
         # Call the RAG pipeline
         rag_text = generate_adaptive_lesson_plan(
             grade= grade,
             topic= topic,
             subject = subject,
-            disorder= disorder
+            exec_skills = exec_skills,
         )
 
         if not rag_text:

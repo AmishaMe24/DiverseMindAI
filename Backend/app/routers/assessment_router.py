@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status, APIRouter
-from typing import Optional, Dict, Any
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 from app.services.assesment_service import generate_assesment
 
@@ -8,9 +8,9 @@ router = APIRouter()
 # Request schema
 class AssessmentRequest(BaseModel):
     subject: str = Field(..., description="Subject for the assessment")
-    disorder: str = Field(..., description="Learning disorder or condition to address")
     topic: str = Field(..., description="Mathematical topic for the assessment")
     grade: str = Field(..., description="Grade level for the assessment")
+    exec_skills: Optional[List[str]] = Field(default_factory=list, description="List of executive skills to address")
 
 # Response schema
 class AssessmentResponse(BaseModel):
@@ -22,21 +22,21 @@ class AssessmentResponse(BaseModel):
 @router.post("", response_model=AssessmentResponse, status_code=status.HTTP_200_OK)
 async def get_assessment(request: AssessmentRequest):
     """
-    Generate an assessment using the RAG pipeline based on the specified disorder, 
+    Generate an assessment using the RAG pipeline based on the specified skills, 
     topic, grade level, and additional requirements.
     """
     try:
         subject = request.subject
         topic = request.topic
         grade = request.grade
-        disorder = request.disorder
+        exec_skills = request.exec_skills
 
         # Call the RAG pipeline
         assessment_text = generate_assesment(
             grade=grade,
             topic=topic,
             subject=subject,
-            disorder=disorder
+            exec_skills = exec_skills
         )
 
         if not assessment_text:
