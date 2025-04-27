@@ -20,23 +20,20 @@ CONTEXT 3 (Math-Specific Teaching Strategies):
 - Connect concepts like division and fractions to place value
 """
 
-LLMs = {
-    'llama':'meta-llama/llama-4-maverick:free',
-    'gemini':'google/gemini-2.0-flash-thinking-exp:free',
-    'deepseek':'deepseek/deepseek-r1-zero:free'
-}
-# SETUP — your persistent DB + OpenRouter
-openai.api_base = "https://openrouter.ai/api/v1"
-openai.api_key = os.getenv('LLM_KEY')
-llm_model = LLMs['deepseek']  # Update this to your actual model on OpenRouter
-print("LLM_KEY:", os.getenv("LLM_KEY"))  # This should show the key (or None)
+
+
+
+
+
+openai.api_key = os.getenv('OPENAI_API_KEY')  # Must be your OpenAI API Key now
+print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))  # For debug, remove in production
 
 # Executive Skill Map
-executive_skill_map = {
-    "dyscalculia": ["Enhancing Working Memory", "Cultivating Metacognition", "Fostering Organization", "Promoting, Planning, and Prioritizing"],
-    "dyslexia": ["Task Initiation", "Sustained Attention", "Metacognition", "Organization"],
-    "autism": ["Emotional Control", "Flexibility", "Goal-Directed Persistence", "Time Management"]
-}
+# executive_skill_map = {
+#     "dyscalculia": ["Enhancing Working Memory", "Cultivating Metacognition", "Fostering Organization", "Promoting, Planning, and Prioritizing"],
+#     "dyslexia": ["Task Initiation", "Sustained Attention", "Metacognition", "Organization"],
+#     "autism": ["Emotional Control", "Flexibility", "Goal-Directed Persistence", "Time Management"]
+# }
 
 
 def get_context(client):
@@ -49,7 +46,7 @@ def get_context(client):
             name="lesson_plans",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
-    print(f'\n lesson collection--------------------------------------------------------------:\n:{lesson_collection.peek()}')
+    # print(f'\n lesson collection--------------------------------------------------------------:\n:{lesson_collection.peek()}')
     
     # for doc in lesson_collection.get()['metadatas']:
     #     print(doc.get('grade'), doc.get('topic'))
@@ -63,25 +60,17 @@ def get_context(client):
             name="exec_skills",
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
-    print(f'\n exec_collection--------------------------------------------------------------:\n:{exec_collection.peek()}')
+    # print(f'\n exec_collection--------------------------------------------------------------:\n:{exec_collection.peek()}')
 
     return lesson_collection, exec_collection
 
 
-# FUNCTION: Generate the augmented lesson plan
-# Load ChromaDB collections
-
-# file_path = os.path.abspath("")
-# Modify the ChromaDB client initialization part
-
-
-# Get or create collections
 
     
 # FUNCTION: Generate the augmented lesson plan
-def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
-    disorder_key = disorder.lower()
-    exec_skills = executive_skill_map.get(disorder_key, [])
+def generate_adaptive_lesson_plan(grade, topic, subject, exec_skills):
+    exec_skills = exec_skills
+    print(exec_skills)
     client = PersistentClient(
     path="./app/chroma_store"
 )
@@ -119,14 +108,14 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
 
     # Prompt template
     prompt = f"""
-    You are a lesson planning assistant for special education teachers. Your task is to generate a complete math lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from executive function skills helpful for students with {disorder.title()}.
+    You are a lesson planning assistant for special education teachers. Your task is to generate a complete math lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from the selected executive function skills thatbhave beenn proven to be effective in teaching neurodiverse students {exec_skills}.
 
     Use the academic lesson content provided in CONTEXT 1 and the executive functioning strategies provided in CONTEXT 2. Match the exact structure and tone of the uploaded lesson plans.
 
     CONTEXT 1 (Lesson Plan Content):
     {lesson_context}
 
-    CONTEXT 2 (Executive Function Strategies for {disorder.title()}):
+    CONTEXT 2 (Executive Function Strategies: {exec_skills}):
     {exec_context}
     {math_strategies}
 
@@ -147,19 +136,23 @@ def generate_adaptive_lesson_plan(grade, topic, subject, disorder):
     - Executive Function Strategy - [Mention strategy/skill name and how it's being applied here]
     """
 
-    print("\n===== LLM INPUT PROMPT =====\n")
+    # print("\n===== LLM INPUT PROMPT =====\n")
     print(prompt)
+    print(len(prompt))
 
     # LLM call to OpenRouter
     response = openai.ChatCompletion.create(
-        model=llm_model,
-        messages=[                              
+        model="gpt-4o",   # <- GPT-4o model name
+        messages=[
             {"role": "system", "content": "You are a supportive and creative educational assistant."},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        temperature=0.7,
+        max_tokens=3000
     )
+    print("LLM raw response:", response)
     llm_output = response.choices[0].message.content
 
-    print("\n===== LLM OUTPUT =====\n")
+    # print("\n===== LLM OUTPUT =====\n")
     print(llm_output)
     return response.choices[0].message.content

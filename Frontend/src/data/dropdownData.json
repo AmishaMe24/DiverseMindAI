@@ -6,6 +6,19 @@
     { "label": "Autism", "value": "autism" },
     { "label": "Other", "value": "other" }
   ],
+  "exec_skills": [
+  { "label": "Building Response Inhibition", "value": "Building Response Inhibition" },
+  { "label": "Enhancing Working Memory", "value": "Enhancing Working Memory" },
+  { "label": "Improving Emotional Control", "value": "Improving Emotional Control" },
+  { "label": "Strengthening Sustained Attention", "value": "Strengthening Sustained Attention" },
+  { "label": "Teaching Task Initiation", "value": "Teaching Task Initiation" },
+  { "label": "Promoting Planning and Prioritizing", "value": "Promoting Planning and Prioritizing" },
+  { "label": "Fostering Organization", "value": "Fostering Organization" },
+  { "label": "Instilling Time Management", "value": "Instilling Time Management" },
+  { "label": "Encouraging Flexibility", "value": "Encouraging Flexibility" },
+  { "label": "Increasing Goal-Directed Persistence", "value": "Increasing Goal-Directed Persistence" },
+  { "label": "Cultivating Metacognition", "value": "Cultivating Metacognition" }
+  ],
   "grades": [
     { "label": "1", "value": "1" },
     { "label": "2", "value": "2" },
