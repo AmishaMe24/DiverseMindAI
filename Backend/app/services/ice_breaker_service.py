@@ -1,7 +1,7 @@
 import os
 import chromadb
 from sentence_transformers import SentenceTransformer
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 from chromadb import PersistentClient
 load_dotenv()
@@ -9,16 +9,9 @@ import sys
 
 embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
-LLMs = {
-    'llama':'meta-llama/llama-4-maverick:free',
-    'gemini':'google/gemini-2.0-flash-exp:free',
-    'deepseek':'deepseek/deepseek-r1-zero:free'
-}
-# SETUP — your persistent DB + OpenRouter
-openai.api_base = "https://openrouter.ai/api/v1"
-openai.api_key = "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"
-llm_model = LLMs['gemini']
-# print("LLM_KEY:", os.getenv("LLM_KEY"))
+openai = OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY')
+)
 
 
 # Executive Skill Map
@@ -159,12 +152,14 @@ def generate_icebreaker(question,materials, disorder):
     exec_context = "\n\n".join(exec_contexts)
 
     prompt = build_prompt(exec_context,icebreaker_context, question,disorder.title())
-    response = openai.ChatCompletion.create(
-        model=llm_model,
+    response = openai.chat.completions.create(
+        model='gpt-4o',
         messages=[
             {"role": "system", "content": "You are a supportive and creative educational assistant."},
             {"role": "user", "content": prompt}
-        ]
+        ],
+        temperature=0.7,
+        max_tokens=2000
     )
     llm_output = response.choices[0].message.content
 
