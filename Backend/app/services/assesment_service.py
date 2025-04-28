@@ -1,7 +1,7 @@
 import os
 import chromadb
 from sentence_transformers import SentenceTransformer
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 from chromadb import PersistentClient
 load_dotenv()
@@ -20,9 +20,9 @@ CONTEXT 3 (Math-Specific Teaching Strategies):
 - Connect concepts like division and fractions to place value
 """
 
-# SETUP — your persistent DB + OpenRouter
-openai.api_key = os.getenv('OPENAI_API_KEY')  # Must be your OpenAI API Key now
-print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))  # For debug, remove in production
+openai = OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY')
+)
 
 client = PersistentClient(
     path="./app/chroma_store"
@@ -119,14 +119,14 @@ CONTEXT 3 (Executive Function Strategies : {exec_skills}):
 """
 
     # LLM call to OpenRouter
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4o",   # <- GPT-4o model name
         messages=[
             {"role": "system", "content": "You are a supportive and creative educational assistant."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.7,
-        max_tokens=3000
+        max_tokens=2000
     )
     llm_output = response.choices[0].message.content
 

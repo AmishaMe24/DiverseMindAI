@@ -1,10 +1,9 @@
 import os
 import chromadb
 from sentence_transformers import SentenceTransformer
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 from chromadb import PersistentClient
-load_dotenv()
 import sys
 
 math_strategies = """
@@ -23,17 +22,13 @@ CONTEXT 3 (Math-Specific Teaching Strategies):
 
 
 
+load_dotenv()
 
 
-openai.api_key = os.getenv('OPENAI_API_KEY')  # Must be your OpenAI API Key now
-print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY"))  # For debug, remove in production
-
-# Executive Skill Map
-# executive_skill_map = {
-#     "dyscalculia": ["Enhancing Working Memory", "Cultivating Metacognition", "Fostering Organization", "Promoting, Planning, and Prioritizing"],
-#     "dyslexia": ["Task Initiation", "Sustained Attention", "Metacognition", "Organization"],
-#     "autism": ["Emotional Control", "Flexibility", "Goal-Directed Persistence", "Time Management"]
-# }
+openai = OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY')
+)
+print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY")[:5])  # For debug, remove in production
 
 
 def get_context(client):
@@ -108,7 +103,8 @@ def generate_adaptive_lesson_plan(grade, topic, subject, exec_skills):
 
     # Prompt template
     prompt = f"""
-    You are a lesson planning assistant for special education teachers. Your task is to generate a complete math lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from the selected executive function skills thatbhave beenn proven to be effective in teaching neurodiverse students {exec_skills}.
+    You are a lesson planning assistant for special education teachers. Your task is to generate a complete STEM lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from the selected executive function skills that have been proven to be effective in teaching neurodiverse students {exec_skills}.
+    The lesson plan should be in such a way that the teacher just needs to read out and does not require deeper understanding  of the strategies and skills.
 
     Use the academic lesson content provided in CONTEXT 1 and the executive functioning strategies provided in CONTEXT 2. Match the exact structure and tone of the uploaded lesson plans.
 
@@ -132,7 +128,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, exec_skills):
 
     Each section should include
     - Method
-    - Activities
+    - Activities: the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.
     - Executive Function Strategy - [Mention strategy/skill name and how it's being applied here]
     """
 
@@ -141,18 +137,18 @@ def generate_adaptive_lesson_plan(grade, topic, subject, exec_skills):
     print(len(prompt))
 
     # LLM call to OpenRouter
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4o",   # <- GPT-4o model name
         messages=[
-            {"role": "system", "content": "You are a supportive and creative educational assistant."},
+            {"role": "system", "content": "You are a creative, structured, and neurodiversity-aware educational assistant who specializes in writing adaptive STEM lesson plans based on provided lessons, strategies and contexts"},
             {"role": "user", "content": prompt}
         ],
         temperature=0.7,
-        max_tokens=3000
+        max_tokens=2000
     )
     print("LLM raw response:", response)
     llm_output = response.choices[0].message.content
 
     # print("\n===== LLM OUTPUT =====\n")
-    print(llm_output)
+    print(len(llm_output))
     return response.choices[0].message.content
