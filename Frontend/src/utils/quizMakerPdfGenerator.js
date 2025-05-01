@@ -33,19 +33,32 @@ export const downloadQuizAsPDF = (assessment, selected, dropdowns, setIsDownload
     const getLabel = (type, value) =>
       dropdowns[type].options.find(o => o.value === value)?.label || value;
 
-    const title = assessment.title || 'Math Assessment';
-    const subject = getLabel('subject', selected.subject);
+    // Format executive skills for display
+    const execSkillsLabels = selected.exec_skills.map(skillValue => {
+      const skill = dropdowns.exec_skills.options.find(opt => opt.value === skillValue);
+      return skill ? skill.label : skillValue;
+    }).join(', ');
+
+    const title = assessment.title || 'Assessment';
+    const subject = getLabel('mainSubject', selected.mainSubject);
     const topic = getLabel('topic', selected.topic);
     const grade = getLabel('grade', selected.grade);
-    const adaptation = getLabel('disorder', selected.disorder);
-
+    
     // Build HTML for printing with header information
-    const headerHtml = `
+    let headerHtml = `
       <h1>${title}</h1>
       <p><strong>Subject:</strong> ${subject} &bull;
-         <strong>Topic:</strong> ${topic} &bull;
          <strong>Grade:</strong> ${grade} &bull;
-         <strong>Adaptation:</strong> ${adaptation}</p>
+         <strong>Topic:</strong> ${topic}`;
+    
+    // Only include subtopic for Mathematics
+    if (selected.mainSubject === 'Mathematics' && selected.subtopic) {
+      const subtopic = getLabel('subtopic', selected.subtopic);
+      headerHtml += ` &bull; <strong>Sub-Topic:</strong> ${subtopic}`;
+    }
+    
+    // Add executive function skills
+    headerHtml += ` &bull; <strong>Executive Function Skills:</strong> ${execSkillsLabels}</p>
       <hr />
     `;
 
