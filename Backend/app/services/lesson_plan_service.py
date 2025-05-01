@@ -5,6 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from chromadb import PersistentClient
 import sys
+import prompts
 
 math_strategies = """
 CONTEXT 3 (Math-Specific Teaching Strategies):
@@ -31,14 +32,18 @@ openai = OpenAI(
 print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY")[:5])  # For debug, remove in production
 
 
-def get_context(client):
+def get_context(client, subject):
+    map_subject = {
+        'Maths': 'lesson_plans',
+        'Science': 'chroma_science_store1',
+    }
     try:
-        lesson_collection = client.get_collection("lesson_plans")
+        lesson_collection = client.get_collection(map_subject[subject])
     except Exception as e:
         print(f"Error getting lesson_plans collection: {e}")
         # Create the collection
         lesson_collection = client.create_collection(
-            name="lesson_plans",
+            name=map_subject[subject],
             metadata={"hnsw:space": "cosine"}  # Choose appropriate embedding space
         )
     # print(f'\n lesson collection--------------------------------------------------------------:\n:{lesson_collection.peek()}')
@@ -63,28 +68,41 @@ def get_context(client):
 
     
 # FUNCTION: Generate the augmented lesson plan
-def generate_adaptive_lesson_plan(grade, topic, subject, exec_skills):
+def generate_adaptive_lesson_plan(subject, grade, topic, subtopic, exec_skills):
     exec_skills = exec_skills
     print(exec_skills)
-    client = PersistentClient(
-    path="./app/chroma_store"
-)
+    client = PersistentClient(path="./app/chroma_store")
 
-    lesson_collection, exec_collection = get_context(client)
+    lesson_collection, exec_collection = get_context(client, subject)
     # Get lesson chunks
-    lesson_results = lesson_collection.query(
-        query_texts=[f"Lesson on {topic} under {subject} for grade {grade}"],  # semantic hint
-        n_results=5,
-        where={
-            "$and": [
-                {"grade": str(grade).strip()},       # could be "6" or "Algebra I"
-                {"subject": topic.strip()}
-            ]
-        },
-        include=["documents", "metadatas"]
-    )
+    if subject == 'Maths':
+        lesson_results = lesson_collection.query(
+            query_texts=[f"Lesson for {subject} on {topic} under {subtopic} for grade {grade}"],  # semantic hint
+            n_results=5,
+            where={
+                "$and": [
+                    {"grade": str(grade).strip()},       # could be "6" or "Algebra I"
+                    {"subject": subtopic.strip()}
+                ]
+            },
+            include=["documents", "metadatas"]
+        )
 
-    lesson_context = "\n\n".join(lesson_results["documents"][0])
+        lesson_context = "\n\n".join(lesson_results["documents"][0])
+    elif subject == 'Science':
+        lesson_results = lesson_collection.query(
+            query_texts=[f"Lesson for {subject} on {topic} for grade {grade}"],  # semantic hint
+            n_results=5,
+            where={
+                "$and": [
+                    {"grade": str(grade).strip()},       # could be "6" or "Algebra I"
+                    {"lesson_title": topic.strip()}
+                ]
+            },
+            include=["documents", "metadatas"]
+        )
+
+        lesson_context = "\n\n".join(lesson_results["documents"][0])
     # print(f'\nlesson_context--------------------------------------------------------------:\n:{lesson_context}')
 
     # Get exec strategy chunks
@@ -102,35 +120,7 @@ def generate_adaptive_lesson_plan(grade, topic, subject, exec_skills):
     print(f'exec_context--------------------------------------------------------------:\n{exec_context}')
 
     # Prompt template
-    prompt = f"""
-    You are a lesson planning assistant for special education teachers. Your task is to generate a complete STEM lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from the selected executive function skills that have been proven to be effective in teaching neurodiverse students {exec_skills}.
-    The lesson plan should be in such a way that the teacher just needs to read out and does not require deeper understanding  of the strategies and skills.
-
-    Use the academic lesson content provided in CONTEXT 1 and the executive functioning strategies provided in CONTEXT 2. Match the exact structure and tone of the uploaded lesson plans.
-
-    CONTEXT 1 (Lesson Plan Content):
-    {lesson_context}
-
-    CONTEXT 2 (Executive Function Strategies: {exec_skills}):
-    {exec_context}
-    {math_strategies}
-
-    ---
-
-    Please write the lesson using the following structure:
-
-    1. Introduction (15 min)
-    2. Multi-Sensory Exploration (20 min)
-    3. Concept Practice (15–20 min)
-    4. Patterns / Deeper Understanding (optional)
-    5. Real-Life Applications (15 min)
-    6. Wrap-Up & Reflection (10 min)
-
-    Each section should include
-    - Method
-    - Activities: the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.
-    - Executive Function Strategy - [Mention strategy/skill name and how it's being applied here]
-    """
+    prompt = prompts.get_prompt(subject, lesson_context, exec_context, exec_skills)
 
     # print("\n===== LLM INPUT PROMPT =====\n")
     print(prompt)
