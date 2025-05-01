@@ -12,7 +12,7 @@ router = APIRouter()
 class LessonPlanRequest(BaseModel):
     subject: str = Field(..., description="Subject for the lesson plan")
     topic: str = Field(..., description="Topic for the lesson based on the subject")
-    subtopic: str = Field(..., description="Mathematical topic for the lesson")
+    subtopic: Optional[str] = Field(None, description="Subtopic (required only for Maths)")
     grade: str = Field(..., description="Grade level for the lesson")
     exec_skills: Optional[List[str]] = Field(default_factory=list, description="List of executive skills to address")
 
