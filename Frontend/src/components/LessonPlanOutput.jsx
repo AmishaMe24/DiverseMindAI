@@ -12,6 +12,14 @@ export default function LessonPlanOutput({ lessonPlan, selected, dropdowns }) {
     downloadLessonPlanAsPDF(lessonPlan, selected, dropdowns, setIsPdfLoading)
   }
 
+  // Format executive skills for display
+  const formatExecSkills = () => {
+    return selected.exec_skills.map(skillValue => {
+      const skill = dropdowns.exec_skills.options.find(opt => opt.value === skillValue);
+      return skill ? skill.label : skillValue;
+    }).join(', ');
+  };
+
   if (!lessonPlan) return null
 
   return (
@@ -29,6 +37,31 @@ export default function LessonPlanOutput({ lessonPlan, selected, dropdowns }) {
       </div>
 
       <div id="lesson-plan-content" className="space-y-6" ref={pdfRef}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <h3 className="font-medium text-gray-800 mb-1">Subject</h3>
+            <p className="text-gray-700">{selected.mainSubject}</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-800 mb-1">Grade Level</h3>
+            <p className="text-gray-700">{selected.grade}</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-800 mb-1">Topic</h3>
+            <p className="text-gray-700">{selected.topic}</p>
+          </div>
+          {selected.mainSubject !== 'Science' && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-1">Sub-Topic</h3>
+              <p className="text-gray-700">{selected.subtopic}</p>
+            </div>
+          )}
+          <div className={selected.mainSubject === 'Science' ? "md:col-span-1" : "md:col-span-2"}>
+            <h3 className="font-medium text-gray-800 mb-1">Executive Function Skills</h3>
+            <p className="text-gray-700">{formatExecSkills()}</p>
+          </div>
+        </div>
+
         <div>
           <h3 className="font-medium text-gray-800 mb-1">Lesson Title</h3>
           <p className="text-gray-700">{lessonPlan.lessonName}</p>

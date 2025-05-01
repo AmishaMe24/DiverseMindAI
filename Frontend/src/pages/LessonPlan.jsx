@@ -14,74 +14,136 @@ export default function LessonPlan() {
 
   // State for selected values
   const [selected, setSelected] = useState({
-    disorder: '',
-    subject: '',
+    exec_skills: [],
+    mainSubject: '',
     topic: '',
+    subtopic: '',
     grade: '',
   })
 
   // State for available options based on selections
-  const [availableSubjects, setAvailableSubjects] = useState([])
+  const [availableGrades, setAvailableGrades] = useState(dropdownData.grades)
   const [availableTopics, setAvailableTopics] = useState([])
+  const [availableSubtopics, setAvailableSubtopics] = useState([])
 
-  // Update available subjects when grade changes
+  // Update available grades when main subject changes
   useEffect(() => {
-    if (selected.grade) {
-      setAvailableSubjects(dropdownData.subjects[selected.grade] || [])
-      // Reset subject and topic when grade changes
-      setSelected(prev => ({ ...prev, subject: '', topic: '' }))
+    if (selected.mainSubject) {
+      // Filter grades based on selected subject
+      if (selected.mainSubject === 'Science') {
+        // For Science, only show grades up to 6
+        setAvailableGrades(dropdownData.grades.filter(grade => 
+          !isNaN(parseInt(grade.value)) && parseInt(grade.value) <= 6
+        ));
+      } else {
+        // For Mathematics, show all grades
+        setAvailableGrades(dropdownData.grades);
+      }
+      // Reset grade, topic, and subtopic when main subject changes
+      setSelected(prev => ({ ...prev, grade: '', topic: '', subtopic: '' }))
     } else {
-      setAvailableSubjects([])
+      setAvailableGrades(dropdownData.grades);
     }
-  }, [selected.grade])
+  }, [selected.mainSubject])
 
-  // Update available topics when subject changes
+  // Update available topics based on subject and grade
   useEffect(() => {
-    if (selected.grade && selected.subject) {
+    if (selected.mainSubject === 'Science' && selected.grade) {
+      // For Science, filter topics based on the selected grade
+      const gradeMap = {
+        '1': 'First Grade',
+        '2': 'Second Grade',
+        '3': 'Third Grade',
+        '4': 'Fourth Grade',
+        '5': 'Fifth Grade',
+        '6': 'Sixth Grade',
+        'K': 'Kindergarten'
+      };
+      
+      const selectedGradeText = gradeMap[selected.grade] || selected.grade;
+      
+      // Filter science topics by the selected grade
       setAvailableTopics(
-        dropdownData.topics[selected.grade]?.[selected.subject] || []
-      )
-      // Reset topic when subject changes
-      setSelected(prev => ({ ...prev, topic: '' }))
+        dropdownData.scienceTopics.filter(topic => topic.grade === selectedGradeText) || []
+      );
+      
+      // Reset topic when grade changes
+      setSelected(prev => ({ ...prev, topic: '', subtopic: '' }));
+    } else if (selected.mainSubject === 'Maths' && selected.grade) {
+      // For Mathematics, use the grade-specific topics
+      setAvailableTopics(dropdownData.subjects[selected.grade] || []);
+      // Reset topic and subtopic when grade changes
+      setSelected(prev => ({ ...prev, topic: '', subtopic: '' }));
     } else {
-      setAvailableTopics([])
+      setAvailableTopics([]);
     }
-  }, [selected.grade, selected.subject])
+  }, [selected.mainSubject, selected.grade])
+
+  // Update available subtopics when topic changes (only for Mathematics)
+  useEffect(() => {
+    if (selected.mainSubject === 'Maths' && selected.grade && selected.topic) {
+      setAvailableSubtopics(
+        dropdownData.topics[selected.grade]?.[selected.topic] || []
+      )
+      // Reset subtopic when topic changes
+      setSelected(prev => ({ ...prev, subtopic: '' }))
+    } else {
+      setAvailableSubtopics([])
+    }
+  }, [selected.mainSubject, selected.grade, selected.topic])
 
   // Dropdown data based on JSON file
   const dropdowns = {
+    mainSubject: {
+      label: 'Subject',
+      options: dropdownData.mainSubjects,
+    },
     grade: {
       label: 'Grade Level',
-      options: dropdownData.grades,
-    },
-    subject: {
-      label: 'Subject',
-      options: availableSubjects,
+      options: availableGrades,
     },
     topic: {
-      label: 'Topic (Chapter)',
+      label: 'Topic',
       options: availableTopics,
     },
-    disorder: {
-      label: 'Learning Accommodation',
-      options: dropdownData.disorders,
+    subtopic: {
+      label: 'Sub-Topic',
+      options: availableSubtopics,
+    },
+    exec_skills: {
+      label: 'Executive Function Skills',
+      options: dropdownData.exec_skills,
     },
   }
 
   // Handle select change
   const handleSelectChange = (selectedOption, actionMeta) => {
     const { name } = actionMeta
-    setSelected(prev => ({
-      ...prev,
-      [name]: selectedOption ? selectedOption.value : ''
-    }))
+    
+    if (name === 'exec_skills') {
+      setSelected(prev => ({
+        ...prev,
+        exec_skills: selectedOption ? selectedOption.map(option => option.value) : []
+      }))
+    } else {
+      setSelected(prev => ({
+        ...prev,
+        [name]: selectedOption ? selectedOption.value : ''
+      }))
+    }
   }
 
   // Handle form submission
   const handleSubmit = async () => {
     // Validate form data
-    if (!selected.disorder || !selected.subject || !selected.topic || !selected.grade) {
+    if (selected.exec_skills.length === 0 || !selected.mainSubject || !selected.topic || !selected.grade) {
       setError('Please fill in all required fields')
+      return
+    }
+    
+    // For Mathematics, subtopic is required
+    if (selected.mainSubject === 'Maths' && !selected.subtopic) {
+      setError('Please select a sub-topic')
       return
     }
 
@@ -95,10 +157,21 @@ export default function LessonPlan() {
     try {
       // Prepare request body
       const requestBody = {
-        disorder: selected.disorder,
-        subject: selected.subject,
+        exec_skills: selected.exec_skills,
+        subject: selected.mainSubject,
         topic: selected.topic,
-        grade: selected.grade,
+      }
+      
+      // Handle grade differently for Science vs Mathematics
+      if (selected.mainSubject === 'Science') {
+        // For Science, find the selected topic and use its grade property
+        const selectedTopic = dropdownData.scienceTopics.find(topic => topic.value === selected.topic);
+        requestBody.grade = selectedTopic ? selectedTopic.grade : selected.grade;
+      } else {
+        // For Mathematics, use the selected grade directly
+        requestBody.grade = selected.grade;
+        // Only include subtopic for Mathematics
+        requestBody.subtopic = selected.subtopic;
       }
 
       // Make API call
@@ -181,25 +254,49 @@ export default function LessonPlan() {
 
         {/* Form section - Modified to have one dropdown per row */}
         <div className="flex flex-col gap-6 mb-8">
-          {Object.entries(dropdowns).map(([name, data]) => (
+          {Object.entries(dropdowns)
+            .filter(([name]) => {
+              // Hide subtopic dropdown when Science is selected
+              if (name === 'subtopic' && selected.mainSubject === 'Science') {
+                return false;
+              }
+              return true;
+            })
+            .map(([name, data]) => (
             <div key={name} className="mb-2">
               <label className="block mb-2 text-sm font-medium text-gray-700">
                 {data.label}
               </label>
-              <Select
-                name={name}
-                options={data.options}
-                value={
-                  selected[name]
-                    ? { value: selected[name], label: selected[name] }
-                    : null
-                }
-                onChange={handleSelectChange}
-                placeholder={`Select ${data.label.toLowerCase()}...`}
-                isClearable
-                isSearchable
-                styles={customStyles}
-              />
+              {name === 'exec_skills' ? (
+                <Select
+                  name={name}
+                  options={data.options}
+                  value={data.options.filter(option => 
+                    selected.exec_skills.includes(option.value)
+                  )}
+                  onChange={handleSelectChange}
+                  placeholder={`Select ${data.label.toLowerCase()}...`}
+                  isMulti
+                  isClearable
+                  isSearchable
+                  styles={customStyles}
+                />
+              ) : (
+                <Select
+                  name={name}
+                  options={data.options}
+                  value={
+                    selected[name]
+                      ? { value: selected[name], label: selected[name] }
+                      : null
+                  }
+                  onChange={handleSelectChange}
+                  placeholder={`Select ${data.label.toLowerCase()}...`}
+                  isClearable
+                  isSearchable
+                  styles={customStyles}
+                />
+              )}
             </div>
           ))}
         </div>

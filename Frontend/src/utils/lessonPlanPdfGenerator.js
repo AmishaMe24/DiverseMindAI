@@ -266,31 +266,49 @@ const generateExamplesHtml = (examples) => {
 const generateHeaderInfo = (lessonPlan, selected, dropdowns) => {
   const titleText = lessonPlan.lessonName || 'Generated Lesson Plan'
   
-  return `
+  // Format executive skills for display
+  const execSkillsLabels = selected.exec_skills.map(skillValue => {
+    const skill = dropdowns.exec_skills.options.find(opt => opt.value === skillValue);
+    return skill ? skill.label : skillValue;
+  }).join(', ');
+  
+  // Create header HTML
+  let headerHtml = `
     <h1>${titleText}</h1>
     <div class="header-info">
       <div class="header-item"><strong>Subject:</strong> ${
-        dropdowns.subject.options.find(
-          (opt) => opt.value === selected.subject
-        )?.label || selected.subject
-      }</div>
-      <div class="header-item"><strong>Topic:</strong> ${
-        dropdowns.topic.options.find(
-          (opt) => opt.value === selected.topic
-        )?.label || selected.topic
+        dropdowns.mainSubject.options.find(
+          (opt) => opt.value === selected.mainSubject
+        )?.label || selected.mainSubject
       }</div>
       <div class="header-item"><strong>Grade Level:</strong> ${
         dropdowns.grade.options.find(
           (opt) => opt.value === selected.grade
         )?.label || selected.grade
       }</div>
-      <div class="header-item"><strong>Accommodation For:</strong> ${
-        dropdowns.disorder.options.find(
-          (opt) => opt.value === selected.disorder
-        )?.label || selected.disorder
-      }</div>
+      <div class="header-item"><strong>Topic:</strong> ${
+        dropdowns.topic.options.find(
+          (opt) => opt.value === selected.topic
+        )?.label || selected.topic
+      }</div>`;
+  
+  // Only include Sub-Topic for Mathematics
+  if (selected.mainSubject !== 'Science') {
+    headerHtml += `
+      <div class="header-item"><strong>Sub-Topic:</strong> ${
+        dropdowns.subtopic.options.find(
+          (opt) => opt.value === selected.subtopic
+        )?.label || selected.subtopic
+      }</div>`;
+  }
+  
+  // Add Executive Function Skills
+  headerHtml += `
+      <div class="header-item"><strong>Executive Function Skills:</strong> ${execSkillsLabels}</div>
     </div>
-  `
+  `;
+  
+  return headerHtml;
 }
 
 // Main function to download lesson plan as PDF
