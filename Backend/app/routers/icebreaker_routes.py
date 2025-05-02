@@ -8,7 +8,7 @@ router = APIRouter()
 
 # Request schema
 class IceBreakerRequest(BaseModel):
-    disorder: str = Field(..., description="Learning disorder or condition to address")
+    exec_skills: Optional[List[str]] = Field(..., description="Executive Skills to address")
     activity: str = Field(..., description="ICE BREAKER ACTIVITY")
     materials: str = Field(..., description="What Materials or If they are needed")
     setting: str = Field(..., description="Virtual / In-Person")
@@ -20,25 +20,25 @@ class IceBreakerResponse(BaseModel):
 @router.post("", response_model=IceBreakerResponse, status_code=status.HTTP_200_OK)
 async def get_icebreaker_activity(request: IceBreakerRequest):
     """
-    Generate a lesson plan using the RAG pipeline based on the specified disorder, topic, grade level, and additional requirements.
+    Generate a lesson plan using the RAG pipeline based on the specified exec_skills, topic, grade level, and additional requirements.
     """
     try:
-        question = "I want a team building activity for a stem group project"
-        materials_filter = "Include any sort of coloured papers"
-        disorder="dyslexic"
-        setting="In-Person"
+        # question = "I want a team building activity for a stem group project"
+        # materials_filter = "Include any sort of coloured papers"
+        # exec_skills="exec_skills"
+        # setting="In-Person"
 
-        # question = request.activity
-        # materials_filter = request.materials
-        # disorder=request.disorder
-        # setting=request.setting
+        question = request.activity
+        materials_filter = request.materials
+        exec_skills=request.exec_skills
+        setting=request.setting
 
-        print(question,materials_filter,disorder,setting)
+        print(question,materials_filter,exec_skills,setting)
 
         rag_text = generate_icebreaker(
             materials=materials_filter,
             question=question,
-            disorder=disorder
+            exec_skills=exec_skills
         )
         if not rag_text:
             raise HTTPException(

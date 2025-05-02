@@ -5,7 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from chromadb import PersistentClient
 import sys
-import prompts
+from . import prompts
 
 math_strategies = """
 CONTEXT 3 (Math-Specific Teaching Strategies):
@@ -35,7 +35,7 @@ print("OPENAI_API_KEY:", os.getenv("OPENAI_API_KEY")[:5])  # For debug, remove i
 def get_context(client, subject):
     map_subject = {
         'Maths': 'lesson_plans',
-        'Science': 'chroma_science_store1',
+        'Science': 'science_lessons',
     }
     try:
         lesson_collection = client.get_collection(map_subject[subject])
@@ -95,7 +95,7 @@ def generate_adaptive_lesson_plan(subject, grade, topic, subtopic, exec_skills):
             n_results=5,
             where={
                 "$and": [
-                    {"grade": str(grade).strip()},       # could be "6" or "Algebra I"
+                    {"grade": grade.strip()},    
                     {"lesson_title": topic.strip()}
                 ]
             },
@@ -103,7 +103,7 @@ def generate_adaptive_lesson_plan(subject, grade, topic, subtopic, exec_skills):
         )
 
         lesson_context = "\n\n".join(lesson_results["documents"][0])
-    # print(f'\nlesson_context--------------------------------------------------------------:\n:{lesson_context}')
+    print(f'\nlesson_context--------------------------------------------------------------:\n:{lesson_context}')
 
     # Get exec strategy chunks
     exec_contexts = []

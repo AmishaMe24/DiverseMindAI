@@ -9,6 +9,7 @@ router = APIRouter()
 class AssessmentRequest(BaseModel):
     subject: str = Field(..., description="Subject for the assessment")
     topic: str = Field(..., description="Mathematical topic for the assessment")
+    subtopic: Optional[str] = Field(None, description="Subtopic (required only for Maths)")
     grade: str = Field(..., description="Grade level for the assessment")
     exec_skills: Optional[List[str]] = Field(default_factory=list, description="List of executive skills to address")
 
@@ -28,14 +29,16 @@ async def get_assessment(request: AssessmentRequest):
     try:
         subject = request.subject
         topic = request.topic
+        subtopic = request.subtopic
         grade = request.grade
         exec_skills = request.exec_skills
 
         # Call the RAG pipeline
         assessment_text = generate_assesment(
             grade=grade,
+            subject = subject,
             topic=topic,
-            subject=subject,
+            subtopic=subtopic,
             exec_skills = exec_skills
         )
 

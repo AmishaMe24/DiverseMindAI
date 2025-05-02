@@ -14,13 +14,6 @@ openai = OpenAI(
 )
 
 
-# Executive Skill Map
-executive_skill_map = {
-    "dyscalculia": ["Enhancing Working Memory", "Cultivating Metacognition", "Fostering Organization", "Promoting, Planning, and Prioritizing"],
-    "dyslexia": ["Task Initiation", "Sustained Attention", "Metacognition", "Organization"],
-    "autism": ["Emotional Control", "Flexibility", "Goal-Directed Persistence", "Time Management"]
-}
-
 
 # def get_context(client):
 #     try:
@@ -64,28 +57,46 @@ def retrieve_context_from_chroma_with_metadata(query, collection, embedder, k=4,
 
     return docs, metadatas
 
-def build_prompt(exec_context,icebreaker_context, query, disorder):
-    return f"""You are an assistant for special education teachers. Your task is to generate a icebreaker excercise that aligns with the structure provided, while incorporating cognitive strategies from executive function skills helpful for students with {disorder}.
+def build_prompt(exec_context, icebreaker_context, query, exec_skills):
+    return f"""You are an assistant for special education teachers. Generate an icebreaker exercise incorporating the following cognitive strategies {exec_skills}.
 
-        Use the ice-breaker content provided in CONTEXT 1 and the executive functioning strategies provided in CONTEXT 2.
-        
-        CONTEXT 1 - 
-        {icebreaker_context}
+Use the icebreaker content provided in CONTEXT 1 and the executive functioning strategies in CONTEXT 2.
 
-        CONTEXT 2 (Executive Function Strategies for {disorder}):
-        {exec_context}
+CONTEXT 1 - 
+{icebreaker_context}
 
-        User Query: {query}
+CONTEXT 2 (Executive Function Strategies: {exec_skills}):
+{exec_context}
 
-        answer the user's query **by returning the complete activity in this format**:
+User Query: {query}
 
-        Title:
-        Objective:
-        Materials Needed:
-        Instructions:
-        Debrief / Discussion Points:
-        Additional Details:
-        """
+⚡ VERY IMPORTANT: Return your output in this strict Markdown format:
+
+**Title:** [title here]
+
+**Objective:** [objective here]
+
+**Materials Needed:** [materials needed here]
+
+**Instructions:** 
+* Step 1
+* Step 2
+
+**Debrief / Discussion Points:** 
+* Point 1
+* Point 2
+
+**Tips for Success:** 
+* Tip 1
+* Tip 2
+
+**Variations:** 
+* Variation 1
+* Variation 2
+
+If a section has no content, still include the section heading and write "None."
+"""
+
 
 def query_llama(prompt,client):
     response = client.chat.completions.create(
@@ -109,12 +120,11 @@ def ask_question_rag(question, collection, embedder, materials_filter=None, k=4,
     # answer = query_llama(prompt,client)
     return context
 
-def generate_icebreaker(question,materials, disorder):
+def generate_icebreaker(question,materials, exec_skills):
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     CHROMA_PATH = os.path.join(os.path.dirname(BASE_DIR), "chroma_store")
 
-    disorder_key = disorder.lower()
-    exec_skills = executive_skill_map.get(disorder_key, [])
+    exec_skills = exec_skills
 
     client = PersistentClient(path=CHROMA_PATH)
 
@@ -151,7 +161,7 @@ def generate_icebreaker(question,materials, disorder):
         exec_contexts.extend(results["documents"][0])
     exec_context = "\n\n".join(exec_contexts)
 
-    prompt = build_prompt(exec_context,icebreaker_context, question,disorder.title())
+    prompt = build_prompt(exec_context,icebreaker_context, question,exec_skills)
     response = openai.chat.completions.create(
         model='gpt-4o',
         messages=[
@@ -164,5 +174,5 @@ def generate_icebreaker(question,materials, disorder):
     llm_output = response.choices[0].message.content
 
     print("\n===== LLM OUTPUT =====\n")
-    # print(llm_output)
+    print(llm_output)
     return response.choices[0].message.content
