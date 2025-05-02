@@ -67,8 +67,8 @@ async def get_lesson_plan(request: LessonPlanRequest):
 
         # Wrap the response into a structure your frontend expects
         response = {
-            "title": "Adaptive Math Lesson Plan",
-            "lessonName": f"Math Lesson: {topic}",
+            "title": f"Adaptive {subject} Lesson Plan",
+            "lessonName": f"{subject} Lesson: {topic}",
             "gradeLevel": f"Grade {grade}",
             "concept": topic,
             "lessonPlan": rag_text,  # The raw text from your LLM

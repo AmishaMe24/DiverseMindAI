@@ -3,7 +3,7 @@ import { ChevronDown, Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import Select from 'react-select' // Import React Select
 import { downloadQuizAsPDF } from '../utils/quizMakerPdfGenerator'
-import dropdownData from '../data/dropdownData'
+import dropdownData from '../data/dropdownData.json'
 import { formatAssessmentOutput } from '../utils/assessmentFormatter';
 
 
@@ -17,85 +17,115 @@ export default function QuizMaker() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  // State for available options based on selections
-  const [availableSubjects, setAvailableSubjects] = useState([])
-  const [availableTopics, setAvailableTopics] = useState([])
-
   // State for selected values
   const [selected, setSelected] = useState({
-    disorder: '',
-    subject: '',
+    exec_skills: [],
+    mainSubject: '',
     topic: '',
+    subtopic: '',
     grade: '',
     questionCount: '',
   })
 
-  // Prepare dropdown data
-  const gradeOptions = Object.keys(dropdownData.topics || {}).map(grade => ({
-    label: `${grade}`,
-    value: grade
-  }))
+  // State for available options based on selections
+  const [availableGrades, setAvailableGrades] = useState(dropdownData.grades)
+  const [availableTopics, setAvailableTopics] = useState([])
+  const [availableSubtopics, setAvailableSubtopics] = useState([])
 
-  const disorderOptions = dropdownData.disorders || []
-
-  // Update available subjects when grade changes
+  // Update available grades when main subject changes
   useEffect(() => {
-    if (selected.grade && dropdownData.topics[selected.grade]) {
-      const subjects = Object.keys(dropdownData.topics[selected.grade]).map(subject => ({
-        label: subject,
-        value: subject
-      }))
-      setAvailableSubjects(subjects)
-      
-      // Reset subject and topic when grade changes
-      setSelected(prev => ({
-        ...prev,
-        subject: '',
-        topic: ''
-      }))
-      setAvailableTopics([])
+    if (selected.mainSubject) {
+      // Filter grades based on selected subject
+      if (selected.mainSubject === 'Science') {
+        // For Science, only show grades up to 6
+        setAvailableGrades(dropdownData.grades.filter(grade => 
+          !isNaN(parseInt(grade.value)) && parseInt(grade.value) <= 6
+        ));
+      } else {
+        // For Mathematics, show all grades
+        setAvailableGrades(dropdownData.grades);
+      }
+      // Reset grade, topic, and subtopic when main subject changes
+      setSelected(prev => ({ ...prev, grade: '', topic: '', subtopic: '' }))
+    } else {
+      setAvailableGrades(dropdownData.grades);
     }
-  }, [selected.grade])
+  }, [selected.mainSubject])
 
-  // Update available topics when subject changes
+  // Update available topics based on subject and grade
   useEffect(() => {
-    if (selected.grade && selected.subject && 
-        dropdownData.topics[selected.grade] && 
-        dropdownData.topics[selected.grade][selected.subject]) {
+    if (selected.mainSubject === 'Science' && selected.grade) {
+      // For Science, filter topics based on the selected grade
+      const gradeMap = {
+        '1': 'First Grade',
+        '2': 'Second Grade',
+        '3': 'Third Grade',
+        '4': 'Fourth Grade',
+        '5': 'Fifth Grade',
+        '6': 'Sixth Grade',
+        'K': 'Kindergarten'
+      };
       
-      const topics = dropdownData.topics[selected.grade][selected.subject].map(topic => ({
-        label: topic.label,
-        value: topic.value
-      }))
-      setAvailableTopics(topics)
+      const selectedGradeText = gradeMap[selected.grade] || selected.grade;
       
-      // Reset topic when subject changes
-      setSelected(prev => ({
-        ...prev,
-        topic: ''
-      }))
+      // Filter science topics by the selected grade
+      setAvailableTopics(
+        dropdownData.scienceTopics.filter(topic => topic.grade === selectedGradeText) || []
+      );
+      
+      // Reset topic when grade changes
+      setSelected(prev => ({ ...prev, topic: '', subtopic: '' }));
+    } else if (selected.mainSubject === 'Maths' && selected.grade) {
+      // For Mathematics, use the grade-specific topics
+      setAvailableTopics(dropdownData.subjects[selected.grade] || []);
+      // Reset topic and subtopic when grade changes
+      setSelected(prev => ({ ...prev, topic: '', subtopic: '' }));
+    } else {
+      setAvailableTopics([]);
     }
-  }, [selected.grade, selected.subject])
+  }, [selected.mainSubject, selected.grade])
+
+  // Update available subtopics when topic changes (only for Mathematics)
+  useEffect(() => {
+    if (selected.mainSubject === 'Maths' && selected.grade && selected.topic) {
+      setAvailableSubtopics(
+        dropdownData.topics[selected.grade]?.[selected.topic] || []
+      )
+      // Reset subtopic when topic changes
+      setSelected(prev => ({ ...prev, subtopic: '' }))
+    } else {
+      setAvailableSubtopics([])
+    }
+  }, [selected.mainSubject, selected.grade, selected.topic])
 
   // Handle select change
   const handleSelectChange = (selectedOption, actionMeta) => {
     const { name } = actionMeta
-    setSelected(prev => ({
-      ...prev,
-      [name]: selectedOption ? selectedOption.value : ''
-    }))
+    
+    if (name === 'exec_skills') {
+      setSelected(prev => ({
+        ...prev,
+        exec_skills: selectedOption ? selectedOption.map(option => option.value) : []
+      }))
+    } else {
+      setSelected(prev => ({
+        ...prev,
+        [name]: selectedOption ? selectedOption.value : ''
+      }))
+    }
   }
 
   // Handle form submission
   const handleSubmit = async () => {
     // Validate form data
-    if (
-      !selected.disorder ||
-      !selected.subject ||
-      !selected.topic ||
-      !selected.grade
-    ) {
+    if (selected.exec_skills.length === 0 || !selected.mainSubject || !selected.topic || !selected.grade) {
       setError('Please fill in all required fields')
+      return
+    }
+    
+    // For Mathematics, subtopic is required
+    if (selected.mainSubject === 'Maths' && !selected.subtopic) {
+      setError('Please select a sub-topic')
       return
     }
 
@@ -109,10 +139,21 @@ export default function QuizMaker() {
     try {
       // Prepare request body
       const requestBody = {
-        disorder: selected.disorder,
-        subject: selected.subject,
+        exec_skills: selected.exec_skills,
+        subject: selected.mainSubject,
         topic: selected.topic,
-        grade: selected.grade,
+      }
+      
+      // Handle grade differently for Science vs Mathematics
+      if (selected.mainSubject === 'Science') {
+        // For Science, find the selected topic and use its grade property
+        const selectedTopic = dropdownData.scienceTopics.find(topic => topic.value === selected.topic);
+        requestBody.grade = selectedTopic ? selectedTopic.grade : selected.grade;
+      } else {
+        // For Mathematics, use the selected grade directly
+        requestBody.grade = selected.grade;
+        // Only include subtopic for Mathematics
+        requestBody.subtopic = selected.subtopic;
       }
 
       // Make API call to the assessment endpoint
@@ -166,10 +207,11 @@ export default function QuizMaker() {
   const handleDownloadPDF = () => {
     // Create a compatible format for the PDF generator
     const formattedDropdowns = {
-      grade: { options: gradeOptions },
-      subject: { options: availableSubjects },
+      grade: { options: availableGrades },
+      mainSubject: { options: dropdownData.mainSubjects },
       topic: { options: availableTopics },
-      disorder: { options: disorderOptions }
+      subtopic: { options: availableSubtopics },
+      exec_skills: { options: dropdownData.exec_skills }
     }
     
     downloadQuizAsPDF(assessment, selected, formattedDropdowns, setIsDownloading)
@@ -216,16 +258,44 @@ export default function QuizMaker() {
   const renderAssessment = () => {
     if (!assessment) return null
 
+    // Format executive skills for display
+    const formatExecSkills = () => {
+      return selected.exec_skills.map(skillValue => {
+        const skill = dropdownData.exec_skills.find(opt => opt.value === skillValue);
+        return skill ? skill.label : skillValue;
+      }).join(', ');
+    };
+
     return (
       <div className="space-y-6" ref={assessmentRef}>
-        <div>
-          <h3 className="font-medium text-gray-800 mb-1">Assessment Title</h3>
-          <p className="text-gray-700">{assessment.title}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <h3 className="font-medium text-gray-800 mb-1">Subject</h3>
+            <p className="text-gray-700">{selected.mainSubject}</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-800 mb-1">Grade Level</h3>
+            <p className="text-gray-700">{selected.grade}</p>
+          </div>
+          <div>
+            <h3 className="font-medium text-gray-800 mb-1">Topic</h3>
+            <p className="text-gray-700">{selected.topic}</p>
+          </div>
+          {selected.mainSubject === 'Maths' && (
+            <div>
+              <h3 className="font-medium text-gray-800 mb-1">Sub-Topic</h3>
+              <p className="text-gray-700">{selected.subtopic}</p>
+            </div>
+          )}
+          <div className={selected.mainSubject === 'Science' ? "md:col-span-1" : "md:col-span-2"}>
+            <h3 className="font-medium text-gray-800 mb-1">Executive Function Skills</h3>
+            <p className="text-gray-700">{formatExecSkills()}</p>
+          </div>
         </div>
 
         <div>
-          <h3 className="font-medium text-gray-800 mb-1">Topic</h3>
-          <p className="text-gray-700">{assessment.topic}</p>
+          <h3 className="font-medium text-gray-800 mb-1">Assessment Title</h3>
+          <p className="text-gray-700">{assessment.title}</p>
         </div>
 
         {/* Display the raw assessment text as markdown */}
@@ -250,79 +320,100 @@ export default function QuizMaker() {
           Quiz Maker
         </h1>
 
-        {/* React Select Dropdowns */}
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            Grade Level
-          </label>
-          <Select
-            name="grade"
-            options={gradeOptions}
-            value={gradeOptions.find(option => option.value === selected.grade) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'grade' })}
-            placeholder="Select grade level..."
-            isClearable={false}
-            isSearchable={true}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
-        </div>
-        
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            Subject
-          </label>
-          <Select
-            name="subject"
-            options={availableSubjects}
-            value={availableSubjects.find(option => option.value === selected.subject) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'subject' })}
-            placeholder="Select subject..."
-            isClearable={false}
-            isSearchable={true}
-            isDisabled={!selected.grade}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
-        </div>
-        
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            Topic
-          </label>
-          <Select
-            name="topic"
-            options={availableTopics}
-            value={availableTopics.find(option => option.value === selected.topic) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'topic' })}
-            placeholder="Select topic..."
-            isClearable={false}
-            isSearchable={true}
-            isDisabled={!selected.subject}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
-        </div>
-        
-        <div className="mb-7">
-          <label className="block mb-3 text-sm font-medium text-gray-700">
-            Learning Accommodation
-          </label>
-          <Select
-            name="disorder"
-            options={disorderOptions}
-            value={disorderOptions.find(option => option.value === selected.disorder) || null}
-            onChange={(option, action) => handleSelectChange(option, { ...action, name: 'disorder' })}
-            placeholder="Select accommodation..."
-            isClearable={false}
-            isSearchable={true}
-            styles={customStyles}
-            className="react-select-container"
-            classNamePrefix="react-select"
-          />
+        {/* Form section - Modified to have one dropdown per row */}
+        <div className="flex flex-col gap-6 mb-8">
+          {/* Subject Dropdown */}
+          <div className="mb-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Subject
+            </label>
+            <Select
+              name="mainSubject"
+              options={dropdownData.mainSubjects}
+              value={dropdownData.mainSubjects.find(option => option.value === selected.mainSubject) || null}
+              onChange={handleSelectChange}
+              placeholder="Select subject..."
+              isClearable
+              isSearchable
+              styles={customStyles}
+            />
+          </div>
+
+          {/* Grade Dropdown */}
+          <div className="mb-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Grade Level
+            </label>
+            <Select
+              name="grade"
+              options={availableGrades}
+              value={availableGrades.find(option => option.value === selected.grade) || null}
+              onChange={handleSelectChange}
+              placeholder="Select grade level..."
+              isClearable
+              isSearchable
+              isDisabled={!selected.mainSubject}
+              styles={customStyles}
+            />
+          </div>
+
+          {/* Topic Dropdown */}
+          <div className="mb-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Topic
+            </label>
+            <Select
+              name="topic"
+              options={availableTopics}
+              value={availableTopics.find(option => option.value === selected.topic) || null}
+              onChange={handleSelectChange}
+              placeholder="Select topic..."
+              isClearable
+              isSearchable
+              isDisabled={!selected.grade}
+              styles={customStyles}
+            />
+          </div>
+
+          {/* Subtopic Dropdown - Only shown for Mathematics */}
+          {selected.mainSubject === 'Maths' && (
+            <div className="mb-2">
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Sub-Topic
+              </label>
+              <Select
+                name="subtopic"
+                options={availableSubtopics}
+                value={availableSubtopics.find(option => option.value === selected.subtopic) || null}
+                onChange={handleSelectChange}
+                placeholder="Select sub-topic..."
+                isClearable
+                isSearchable
+                isDisabled={!selected.topic}
+                styles={customStyles}
+              />
+            </div>
+          )}
+
+          {/* Executive Function Skills Dropdown */}
+          <div className="mb-2">
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Executive Function Skills
+            </label>
+            <Select
+              name="exec_skills"
+              options={dropdownData.exec_skills}
+              value={dropdownData.exec_skills.filter(option => 
+                selected.exec_skills.includes(option.value)
+              )}
+              onChange={handleSelectChange}
+              placeholder="Select executive skills..."
+              isMulti
+              isClearable
+              isSearchable
+              styles={customStyles}
+            />
+          </div>
         </div>
 
         {/* Error message */}
