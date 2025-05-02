@@ -93,7 +93,7 @@ def generate_adaptive_lesson_plan(subject, grade, topic, subtopic, exec_skills):
     elif subject == 'Science':
         lesson_results = lesson_collection.query(
             query_texts=[f"Lesson for {subject} on {topic} for grade {grade}"],  # semantic hint
-            n_results=5,
+            n_results=10,
             where={
                 "$and": [
                     {"grade": grade.strip()},    
@@ -135,9 +135,9 @@ def generate_adaptive_lesson_plan(subject, grade, topic, subtopic, exec_skills):
             {"role": "user", "content": prompt}
         ],
         temperature=0.7,
-        max_tokens=2000
+        max_tokens=4000,
     )
-    print("LLM raw response:", response)
+    # print("LLM raw response:", response)
     llm_output = response.choices[0].message.content
 
     # print("\n===== LLM OUTPUT =====\n")

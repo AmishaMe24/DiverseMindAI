@@ -61,74 +61,81 @@ science_strategies = """
 def get_prompt(subject, lesson_context, exec_context, exec_skills):
     llm_prompt = {
     'Maths': f"""
-        You are a lesson planning assistant for special education teachers. Your task is to generate a complete STEM lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from the selected executive function skills that have been proven to be effective in teaching neurodiverse students {exec_skills}.
-        The lesson plan should be in such a way that the teacher just needs to read out and does not require deeper understanding  of the strategies and skills.
+You are a lesson planning assistant for special education teachers. Your task is to generate a complete STEM lesson plan that fully incorporates **all of the lesson content** provided in CONTEXT 1, while also embedding executive function strategies (from CONTEXT 2) and math-specific strategies (from CONTEXT 3).
 
-        Use the academic lesson content provided in CONTEXT 1 and the executive functioning strategies provided in CONTEXT 2. Match the exact structure and tone of the uploaded lesson plans.
+The lesson should be **fully written out like a script** that a teacher can directly read to the class. The teacher should not need to summarize, plan, or infer — just read the output. Use full sentences, clear instructions, and engaging language.
+VERY IMPORTANT: 
+Do NOT omit or shorten any part of the original lesson content. Do not summarize or condense the lesson content. Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
+Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
 
-        ---
-        
-        CONTEXT 1 (Lesson Plan Content):
-        {lesson_context}
+---
 
-        CONTEXT 2 (Executive Function Strategies: {exec_skills}):
-        {exec_context}
+CONTEXT 1 (Full Original Lesson Plan):
+{lesson_context}
 
-        CONTEXT 3 (Math-Specific Teaching Strategies):
-        {math_strategies}
+CONTEXT 2 (Executive Function Strategies used: {exec_skills}):
+{exec_context}
 
-        ---
+CONTEXT 3 (Math-Specific Teaching Strategies):
+{math_strategies}
 
-        Please write the lesson using the following structure:
+---
 
-        1. Introduction (15 min)
-        2. Multi-Sensory Exploration (20 min)
-        3. Concept Practice (15–20 min)
-        4. Patterns / Deeper Understanding (optional)
-        5. Real-Life Applications (15 min)
-        6. Wrap-Up & Reflection (10 min)
+Write the lesson plan using the following structure:
 
-        Each section should include
-        - Method
-        - Activities: the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.
-        - Executive Function Strategy: [Mention strategy/skill name and how it's being applied here]
-        """,
+1. Introduction (15 min)  
+2. Multi-Sensory Exploration (20 min)  
+3. Concept Practice (15–20 min)  
+4. Patterns / Deeper Understanding (optional)  
+5. Real-Life Applications (15 min)  
+6. Wrap-Up & Reflection (10 min)
 
+At the end of the lsson plan , include all the materials and resources needs for the lesson based on the augmented lesson plan.
+
+Each section must include:
+- **Method**: Describe the instructional approach.
+- **Activities**: Write detailed teacher-facing scripts that can be read aloud. Avoid summarizing or condensing.
+- **Executive Function Strategy**: Name the strategy and briefly explain how it's embedded in this section.
+""",
     'Science': f"""
-        You are a lesson planning assistant for special education teachers. Your task is to generate a complete science lesson plan that aligns with the structure and tone of the uploaded exemplars, while incorporating cognitive strategies from the selected executive function skills proven to be effective for neurodiverse students: {exec_skills}.
+You are a lesson planning assistant for special education teachers. Your task is to generate a complete science lesson plan that exactly matches the structure and content of the lesson materials provided in CONTEXT 1.
 
-        The lesson plan should be written so that a teacher can read it directly in class, with no need for specialized understanding of the executive function skills or cognitive science.
+This lesson should be **fully written out like a teacher script** — so a teacher can read it directly to students with no additional preparation. Use full sentences and instructional language throughout. Avoid bullet points, summaries, or generalized instructions.
 
-        Use the academic content provided in CONTEXT 1 and the executive functioning strategies in CONTEXT 2. Be sure to match the structure and level of detail from the example science lessons.
+VERY IMPORTANT: 
+Do NOT omit or shorten any part of the original lesson content. Do not summarize or condense the lesson content. Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
+Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
+Use the provided executive function strategies (in CONTEXT 2) to embed support for neurodiverse learners.
 
-        ---
+---
 
-        CONTEXT 1 (Lesson Plan Content):
-        {lesson_context}
+CONTEXT 1 (Full Original Lesson Plan Content):
+{lesson_context}
 
-        CONTEXT 2 (Executive Function Strategies: {exec_skills}):
-        {exec_context}
+CONTEXT 2 (Executive Function Strategies selected: {exec_skills}):
+{exec_context}
 
-        CONTEXT 3 (General Teaching Strategies):
-        {science_strategies}
+CONTEXT 3 (General Inclusive Teaching Strategies for Science):
+{science_strategies}
 
-        ---
+---
 
-        Please structure the lesson with the following sections:
+Write the lesson plan using the following structure (match the tone and depth of the original lesson):
 
-        1. Engage  
-        2. Explore  
-        3. Explain  
-        4. Elaborate  
-        5. Evaluate  
+1. Engage  
+2. Explore  
+3. Explain  
+4. Elaborate  
+5. Evaluate
 
-        Each section must include:
-        - Method
-        - Activities: Write in a highly detailed, script-like style so the teacher can read it directly to the class.
-        - Executive Function Strategy: [Clearly name the strategy and briefly describe how it is used in this section]
+At the end of the lsson plan , include all the materials and resources needs for the lesson based on the augmented lesson plan.
 
-        Ensure tone, pacing, and student-level match the example plans provided. Make the transitions between sections smooth and explicitly reinforce learning objectives.
-        """
+Each section must include:
+- **Method**: Describe how this section is delivered.
+- **Activities**: Write a script the teacher can read aloud — include questions, instructions, and prompts. Be detailed.
+- **Executive Function Strategy**: State which strategy is being applied in this section, and how it supports students' cognitive needs.
+"""
+
 
         }
     if subject == 'Maths':
