@@ -5,6 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from chromadb import PersistentClient
 import sys
+from .prompts import get_prompt
 from . import prompts
 
 math_strategies = """
@@ -120,7 +121,7 @@ def generate_adaptive_lesson_plan(subject, grade, topic, subtopic, exec_skills):
     print(f'exec_context--------------------------------------------------------------:\n{exec_context}')
 
     # Prompt template
-    prompt = prompts.get_prompt(subject, lesson_context, exec_context, exec_skills)
+    prompt = get_prompt(subject, lesson_context, exec_context, exec_skills)
 
     # print("\n===== LLM INPUT PROMPT =====\n")
     print(prompt)

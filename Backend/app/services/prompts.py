@@ -66,6 +66,8 @@ def get_prompt(subject, lesson_context, exec_context, exec_skills):
 
         Use the academic lesson content provided in CONTEXT 1 and the executive functioning strategies provided in CONTEXT 2. Match the exact structure and tone of the uploaded lesson plans.
 
+        ---
+        
         CONTEXT 1 (Lesson Plan Content):
         {lesson_context}
 
@@ -89,7 +91,7 @@ def get_prompt(subject, lesson_context, exec_context, exec_skills):
         Each section should include
         - Method
         - Activities: the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.
-        - Executive Function Strategy - [Mention strategy/skill name and how it's being applied here]
+        - Executive Function Strategy: [Mention strategy/skill name and how it's being applied here]
         """,
 
     'Science': f"""
@@ -121,9 +123,9 @@ def get_prompt(subject, lesson_context, exec_context, exec_skills):
         5. Evaluate  
 
         Each section must include:
-        - **Method**
-        - **Activities**: Write in a highly detailed, script-like style so the teacher can read it directly to the class.
-        - **Executive Function Strategy**: [Clearly name the strategy and briefly describe how it is used in this section]
+        - Method
+        - Activities: Write in a highly detailed, script-like style so the teacher can read it directly to the class.
+        - Executive Function Strategy: [Clearly name the strategy and briefly describe how it is used in this section]
 
         Ensure tone, pacing, and student-level match the example plans provided. Make the transitions between sections smooth and explicitly reinforce learning objectives.
         """
