@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Select from 'react-select'
+import axios from 'axios'
 import LessonPlanOutput from '../components/LessonPlanOutput'
 import dropdownData from '../data/dropdownData.json'
 import { formatLessonPlanOutput } from '../utils/lessonPlanFormatter';
@@ -174,26 +175,19 @@ export default function LessonPlan() {
         requestBody.subtopic = selected.subtopic;
       }
 
-      // Make API call
-      const response = await fetch('http://localhost:8000/lesson-plan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      })
+      // Make API call using axios instead of fetch
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/lesson-plan`,
+        requestBody,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
-      // Handle response
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(
-          errorData.detail?.message || 'Failed to fetch lesson plan'
-        )
-      }
-
-      const data = await response.json();
+      const data = response.data;
       
-      // Format the lesson plan text if it exists
       if (data && data.lessonPlan) {
         data.lessonPlan = formatLessonPlanOutput(data.lessonPlan);
       }
@@ -201,7 +195,8 @@ export default function LessonPlan() {
       setLessonPlan(data);
       setShowOutput(true);
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred')
+      // Axios error handling
+      setError(err.response?.data?.detail?.message || err.message || 'An unexpected error occurred')
       console.error('Error fetching lesson plan:', err)
     } finally {
       setIsLoading(false)

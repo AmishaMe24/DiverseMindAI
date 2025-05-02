@@ -1,16 +1,75 @@
-import React, { useRef, useState} from 'react'
+import React, { useState } from 'react'
 import { Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { downloadLessonPlanAsPDF } from '../utils/lessonPlanPdfGenerator'
+import axios from 'axios'
 
 export default function LessonPlanOutput({ lessonPlan, selected, dropdowns }) {
-  const pdfRef = useRef()
   const [isPdfLoading, setIsPdfLoading] = useState(false)
 
   // Function to handle PDF download
-  const downloadPDF = () => {
-    downloadLessonPlanAsPDF(lessonPlan, selected, dropdowns, setIsPdfLoading)
-  }
+  const downloadPDF = async () => {
+    try {
+      setIsPdfLoading(true)
+      
+      // Format executive skills for the API
+      const execSkillsLabels = selected.exec_skills.map(skillValue => {
+        const skill = dropdowns.exec_skills.options.find(opt => opt.value === skillValue);
+        return skill ? skill.label : skillValue;
+      });
+      
+      // Prepare data for the API
+      const pdfData = {
+        lessonName: lessonPlan.lessonName,
+        concept: lessonPlan.concept,
+        lessonPlan: lessonPlan.lessonPlan,
+        subject: selected.mainSubject,
+        grade: selected.grade,
+        topic: selected.topic,
+        subtopic: selected.subtopic || null,
+        exec_skills: execSkillsLabels
+      };
+      
+      // Make API call to generate PDF
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/pdf/generate-lesson-pdf`,
+        pdfData,
+        {
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      // Create a blob URL and trigger download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Get filename from Content-Disposition header if available
+      const contentDisposition = response.headers['Content-Disposition'];
+      let filename = `Grade${selected.grade}_${selected.subtopic.replace(/\s+/g, '_')}_LessonPlan.pdf`;
+      
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch.length === 2) {
+          filename = filenameMatch[1];
+        }
+      }
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF. Please try again.');
+    } finally {
+      setIsPdfLoading(false);
+    }
+  };
 
   // Format executive skills for display
   const formatExecSkills = () => {
@@ -36,7 +95,7 @@ export default function LessonPlanOutput({ lessonPlan, selected, dropdowns }) {
         </button>
       </div>
 
-      <div id="lesson-plan-content" className="space-y-6" ref={pdfRef}>
+      <div id="lesson-plan-content" className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <h3 className="font-medium text-gray-800 mb-1">Subject</h3>

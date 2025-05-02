@@ -49,11 +49,7 @@ const faqs = [
     answer: "We support a wide range of learning differences including ADHD, dyslexia, autism spectrum, and more."
   },
   {
-    question: "Can I integrate with my existing LMS?",
-    answer: "Yes, DiverseMind integrates with popular learning management systems like Google Classroom, Canvas, and Schoology."
-  },
-  {
     question: "Is my data secure?",
-    answer: "Absolutely. We use enterprise-grade encryption and follow strict privacy protocols to protect all user data."
+    answer: "Yes. We use enterprise-grade encryption and follow strict privacy protocols to protect all user data."
   }
 ]
