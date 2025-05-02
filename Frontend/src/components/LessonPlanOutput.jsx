@@ -49,7 +49,7 @@ export default function LessonPlanOutput({ lessonPlan, selected, dropdowns }) {
       
       // Get filename from Content-Disposition header if available
       const contentDisposition = response.headers['Content-Disposition'];
-      let filename = `Grade${selected.grade}_${selected.subtopic.replace(/\s+/g, '_')}_LessonPlan.pdf`;
+      let filename = `Grade${selected.grade}_${selected.topic.replace(/\s+/g, '_')}_LessonPlan.pdf`;
       
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="(.+)"/);
