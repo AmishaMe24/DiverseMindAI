@@ -53,7 +53,9 @@ class BoxedText(Flowable):
     def draw(self):
         # Draw the box
         self.canv.setStrokeColor(colors.black)
-        self.canv.setFillColor(colors.lightgrey)
+        # Define a custom light blue that matches your product theme
+        theme_light_blue = colors.lightgrey
+        self.canv.setFillColor(theme_light_blue)  # Using theme color instead of generic lightgrey
         self.canv.rect(0, 0, self.width, self.height, fill=1, stroke=1)
         
         # Draw the title
@@ -162,7 +164,7 @@ def generate_lesson_pdf(lesson_plan_data):
     )
     
     # Add title
-    elements.append(Paragraph(f"{lesson_plan_data.topic}", title_style))
+    elements.append(Paragraph(f"{lesson_plan_data.lessonName}", title_style))
     elements.append(Spacer(1, 0.25*inch))
     
     # Add metadata table
@@ -245,7 +247,16 @@ def generate_lesson_pdf(lesson_plan_data):
             
             # Start collecting the executive function strategy content
             in_exec_strategy = True
-            exec_strategy_title = "Executive Function Strategy"
+            
+            # Extract the full title including text after the colon
+            strategy_match = re.search(r'Executive Function Strategy:(.+)', line)
+            if strategy_match and strategy_match.group(1).strip():
+                # Process any markdown in the strategy title (like bold text)
+                strategy_title_text = process_markdown_for_reportlab("Executive Function Strategy:" + strategy_match.group(1))
+                exec_strategy_title = strategy_title_text
+            else:
+                exec_strategy_title = "Executive Function Strategy"
+                
             exec_strategy_content = ""
             continue
         
