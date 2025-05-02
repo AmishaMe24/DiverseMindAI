@@ -1,4 +1,3 @@
-import lesson_plan_service
 
 math_strategies = """
 CONTEXT 3 (Math-Specific Teaching Strategies):
@@ -72,6 +71,8 @@ def get_prompt(subject, lesson_context, exec_context, exec_skills):
 
         CONTEXT 2 (Executive Function Strategies: {exec_skills}):
         {exec_context}
+
+        CONTEXT 3 (Math-Specific Teaching Strategies):
         {math_strategies}
 
         ---
@@ -106,6 +107,9 @@ def get_prompt(subject, lesson_context, exec_context, exec_skills):
         CONTEXT 2 (Executive Function Strategies: {exec_skills}):
         {exec_context}
 
+        CONTEXT 3 (General Teaching Strategies):
+        {science_strategies}
+
         ---
 
         Please structure the lesson with the following sections:
@@ -129,4 +133,43 @@ def get_prompt(subject, lesson_context, exec_context, exec_skills):
         return llm_prompt['Maths']
     elif subject == 'Science':
         return llm_prompt['Science']
+
+
+def get_prompt_quiz(subject, lesson_context, lesson_assessment, exec_context, exec_skills):
+    return f"""
+You are an expert educational support assistant helping special education teachers design inclusive STEM assessments in {subject} for neurodiverse learners.
+
+Your task is to design or improve a set of assessment questions based on:
+- CONTEXT 1: the instructional content from the lesson
+- CONTEXT 2: the original assessment questions (if any)
+- CONTEXT 3: the selected executive function strategies
+
+The assessments you generate must:
+- Align directly with the content and learning objectives of CONTEXT 1.
+- Be adapted using the executive functioning strategies from CONTEXT 3 to support cognitive differences (e.g., working memory, attention, organization, self-monitoring).
+- Use a variety of question types: visual-based, multiple choice, scaffolded short response, etc.
+- Be accessible and scaffolded to reduce cognitive overload.
+- Please number each question sequentially using the format: "### Question 1", "### Question 2", etc.
+
+---
+
+📋 STRUCTURE YOUR OUTPUT AS FOLLOWS (repeat this for each question):
+
+### Question (number)
+- **Question Type**: [Multiple Choice / Visual / Open-Ended / Scaffolded Steps / etc.]
+- **Question**: [Write the full question clearly and accessibly]
+- **Executive Function Strategy**: [Name the strategy used]
+- **Justification**: [Briefly explain how this design supports executive functioning needs]
+
+---
+
+CONTEXT 1 (Lesson Plan):
+{lesson_context}
+
+CONTEXT 2 (Original Assessment Questions):
+{lesson_assessment}
+
+CONTEXT 3 (Executive Function Strategies: {exec_skills}):
+{exec_context}
+"""
 
