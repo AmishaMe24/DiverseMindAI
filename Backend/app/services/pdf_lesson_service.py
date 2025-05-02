@@ -54,8 +54,8 @@ class BoxedText(Flowable):
         # Draw the box
         self.canv.setStrokeColor(colors.black)
         # Define a custom light blue that matches your product theme
-        theme_light_blue = colors.lightgrey
-        self.canv.setFillColor(theme_light_blue)  # Using theme color instead of generic lightgrey
+        theme_light_blue = colors.lightgrey  # RGB equivalent of #ADD8E6
+        self.canv.setFillColor(theme_light_blue)  # Using theme color instead of lightgrey
         self.canv.rect(0, 0, self.width, self.height, fill=1, stroke=1)
         
         # Draw the title
@@ -238,8 +238,12 @@ def generate_lesson_pdf(lesson_plan_data):
         # Check if this is a numbered heading (like "5. Title")
         is_numbered_heading = re.match(r'^\d+\.\s+', line.strip())
         
-        # Check if this is an Executive Function Strategy section
-        if "Executive Function Strategy:" in line:
+        # Check if this is a Method or Activities line
+        is_method_line = re.search(r'^\s*[•\-\*]?\s*Method:', line.strip())
+        is_activities_line = re.search(r'^\s*[•\-\*]?\s*Activities:', line.strip())
+        
+        # Check if this is an Executive Function Strategy section (regardless of preceding characters)
+        if re.search(r'[•\-\*]?\s*Executive Function Strategy', line):
             # If there's accumulated text, add it first
             if current_text:
                 elements.append(Paragraph(current_text, normal_style))
@@ -248,11 +252,11 @@ def generate_lesson_pdf(lesson_plan_data):
             # Start collecting the executive function strategy content
             in_exec_strategy = True
             
-            # Extract the full title including text after the colon
-            strategy_match = re.search(r'Executive Function Strategy:(.+)', line)
+            # Extract the full title including text after the colon if present
+            strategy_match = re.search(r'Executive Function Strategy:?\s*(.*)', line)
             if strategy_match and strategy_match.group(1).strip():
                 # Process any markdown in the strategy title (like bold text)
-                strategy_title_text = process_markdown_for_reportlab("Executive Function Strategy:" + strategy_match.group(1))
+                strategy_title_text = "Executive Function Strategy: " + process_markdown_for_reportlab(strategy_match.group(1).strip())
                 exec_strategy_title = strategy_title_text
             else:
                 exec_strategy_title = "Executive Function Strategy"
@@ -263,17 +267,16 @@ def generate_lesson_pdf(lesson_plan_data):
         # If we're in an executive function strategy section, collect the content
         if in_exec_strategy:
             # Check if we've reached the end of the executive function strategy section
-            # (next section heading or empty line followed by heading)
             next_line_is_heading = False
             if i < len(lines) - 1:
                 next_line = lines[i + 1].strip()
                 next_line_is_heading = (next_line.startswith('#') or 
                                        re.match(r'^\d+\.\s+', next_line) or
-                                       "Method:" in next_line or
-                                       "Activities:" in next_line)
+                                       re.search(r'Method:', next_line) or
+                                       re.search(r'Activities:', next_line))
             
             if (is_numbered_heading or line.startswith('#') or 
-                "Method:" in line or "Activities:" in line or next_line_is_heading):
+                is_method_line or is_activities_line or next_line_is_heading):
                 # End of executive function strategy section
                 if exec_strategy_content:
                     # Add the boxed executive function strategy
@@ -295,8 +298,25 @@ def generate_lesson_pdf(lesson_plan_data):
                     exec_strategy_content = processed_line
                 continue
         
-        # Simple markdown processing
-        if line.startswith('# '):
+        # Handle Method and Activities lines - remove bullet points and format properly
+        elif is_method_line:
+            if current_text:
+                elements.append(Paragraph(current_text, normal_style))
+                current_text = ""
+            # Extract just the "Method:" part and what follows, removing any bullet points
+            method_text = re.sub(r'^\s*[•\-\*]?\s*Method:', 'Method:', line)
+            elements.append(Paragraph("<b>" + method_text + "</b>", normal_style))
+        
+        elif is_activities_line:
+            if current_text:
+                elements.append(Paragraph(current_text, normal_style))
+                current_text = ""
+            # Extract just the "Activities:" part and what follows, removing any bullet points
+            activities_text = re.sub(r'^\s*[•\-\*]?\s*Activities:', 'Activities:', line)
+            elements.append(Paragraph("<b>" + activities_text + "</b>", normal_style))
+        
+        # Simple markdown processing for other lines
+        elif line.startswith('# '):
             # If there's accumulated text, add it first
             if current_text:
                 elements.append(Paragraph(current_text, normal_style))
