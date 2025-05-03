@@ -3,7 +3,6 @@ import Select from 'react-select'
 import axios from 'axios'
 import LessonPlanOutput from '../components/LessonPlanOutput'
 import dropdownData from '../data/dropdownData.json'
-import { formatLessonPlanOutput } from '../utils/lessonPlanFormatter';
 
 export default function LessonPlan() {
   const [showOutput, setShowOutput] = useState(false)
@@ -122,10 +121,34 @@ export default function LessonPlan() {
     const { name } = actionMeta
     
     if (name === 'exec_skills') {
+      // Check if user is trying to select more than 2 executive skills
+      if (selectedOption && selectedOption.length > 2) {
+        // Limit to first 2 selections
+        const limitedOptions = selectedOption.slice(0, 2);
+        
+        // Show a warning message
+        setError('You can select a maximum of 2 executive skills')
+        
+        // Update state with only the first 2 options
+        setSelected(prev => ({
+          ...prev,
+          exec_skills: limitedOptions.map(option => option.value)
+        }))
+        
+        // Return early to prevent processing more than 2 options
+        return;
+      }
+      
+      // Normal processing for 2 or fewer options
       setSelected(prev => ({
         ...prev,
         exec_skills: selectedOption ? selectedOption.map(option => option.value) : []
       }))
+      
+      // Clear the error message if it was set previously
+      if (error === 'You can select a maximum of 2 executive skills') {
+        setError(null);
+      }
     } else {
       setSelected(prev => ({
         ...prev,
@@ -187,10 +210,6 @@ export default function LessonPlan() {
       );
 
       const data = response.data;
-      
-      if (data && data.lessonPlan) {
-        data.lessonPlan = formatLessonPlanOutput(data.lessonPlan);
-      }
       
       setLessonPlan(data);
       setShowOutput(true);
