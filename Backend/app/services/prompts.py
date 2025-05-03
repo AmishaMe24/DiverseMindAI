@@ -68,8 +68,6 @@ VERY IMPORTANT:
 Do NOT omit or shorten any part of the original lesson content. Do not summarize or condense the lesson content. Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
 Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
 
----
-
 CONTEXT 1 (Full Original Lesson Plan):
 {lesson_context}
 
@@ -79,24 +77,61 @@ CONTEXT 2 (Executive Function Strategies used: {exec_skills}):
 CONTEXT 3 (Math-Specific Teaching Strategies):
 {math_strategies}
 
----
+        VERY IMPORTANT: Please write the lesson using the following strict Markdown structure:
 
-Write the lesson plan using the following structure:
+        **Title:** [Lesson title here]
 
-1. Introduction (15 min)  
-2. Multi-Sensory Exploration (20 min)  
-3. Concept Practice (15–20 min)  
-4. Patterns / Deeper Understanding (optional)  
-5. Real-Life Applications (15 min)  
-6. Wrap-Up & Reflection (10 min)
+        **Objective:** [Learning objective here]
 
-At the end of the lsson plan , include all the materials and resources needs for the lesson based on the augmented lesson plan.
+        **Grade:** [Grade level]
+        
+        **Subject:** [Subject area]
+        
+        **Strand:** [Curriculum strand]
+        
+        **Topic:** [Specific topic being covered]
+        
+        **Primary SOL:** [Standards of Learning reference]
 
-Each section must include:
-- **Method**: Describe the instructional approach.
-- **Activities**: Write detailed teacher-facing scripts that can be read aloud. Avoid summarizing or condensing.
-- **Executive Function Strategy**: Name the strategy and briefly explain how it's embedded in this section.
-""",
+        **Materials Needed:** [List of materials needed]
+        
+        **Vocabulary:** [Key vocabulary terms and definitions]
+
+        **Lesson Plan:**
+
+        **1. Introduction (15 min)**
+        * **Method:**
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **2. Multi-Sensory Exploration (20 min)**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **3. Concept Practice (15–20 min)**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **4. Patterns / Deeper Understanding (optional)**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **5. Real-Life Applications (15 min)**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **6. Wrap-Up & Reflection (10 min)**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        If a section has no content, still include the section heading and write "None."
+        """,
+
     'Science': f"""
 You are a lesson planning assistant for special education teachers. Your task is to generate a complete science lesson plan that exactly matches the structure and content of the lesson materials provided in CONTEXT 1.
 
@@ -107,8 +142,6 @@ Do NOT omit or shorten any part of the original lesson content. Do not summarize
 Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
 Use the provided executive function strategies (in CONTEXT 2) to embed support for neurodiverse learners.
 
----
-
 CONTEXT 1 (Full Original Lesson Plan Content):
 {lesson_context}
 
@@ -118,26 +151,45 @@ CONTEXT 2 (Executive Function Strategies selected: {exec_skills}):
 CONTEXT 3 (General Inclusive Teaching Strategies for Science):
 {science_strategies}
 
----
+        VERY IMPORTANT: Return your output in this strict Markdown format:
 
-Write the lesson plan using the following structure (match the tone and depth of the original lesson):
+        **Title:** [Lesson title here]
 
-1. Engage  
-2. Explore  
-3. Explain  
-4. Elaborate  
-5. Evaluate
+        **Objective:** [Learning objective here]
 
-At the end of the lsson plan , include all the materials and resources needs for the lesson based on the augmented lesson plan.
+        **Materials Needed:** [List of materials needed]
 
-Each section must include:
-- **Method**: Describe how this section is delivered.
-- **Activities**: Write a script the teacher can read aloud — include questions, instructions, and prompts. Be detailed.
-- **Executive Function Strategy**: State which strategy is being applied in this section, and how it supports students' cognitive needs.
-"""
+        **Lesson Plan:**
 
+        **1. Engage**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
 
-        }
+        **2. Explore**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **3. Explain**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **4. Elaborate**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        **5. Evaluate**
+        * **Method:** [Method description]
+        * **Activities:** [the activities should be as detailed as possible. the teacher just need  to  read out the text provided by you.]
+        * **Executive Function Strategy:** [Mention strategy/skill name and how it's being applied here]
+
+        If a section has no content, still include the section heading and write "None."
+        """
+    }
+    
     if subject == 'Maths':
         return llm_prompt['Maths']
     elif subject == 'Science':
