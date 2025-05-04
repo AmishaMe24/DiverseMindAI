@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigate, Link } from 'react-router-dom'
+import logo from '../assets/diversemind-logo.jpg'
 
 export default function SignupPage() {
   const navigate = useNavigate()
@@ -45,7 +46,7 @@ export default function SignupPage() {
             <div className="w-full p-8">
               <div className="flex justify-center mb-6">
                 <img
-                  src="https://flowbite.com/docs/images/logo.svg"
+                  src={logo}
                   className="h-10"
                   alt="Company Logo"
                 />

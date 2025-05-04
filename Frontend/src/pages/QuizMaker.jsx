@@ -1,15 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { ChevronDown, Download } from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
+import React, { useState, useEffect } from 'react'
 import Select from 'react-select' // Import React Select
 import QuizMakerOutput from '../components/QuizMakerOutput'
 import dropdownData from '../data/dropdownData.json'
 import { formatAssessmentOutput } from '../utils/assessmentFormatter';
+import axios from 'axios'; // Import axios
 
 
 export default function QuizMaker() {
   const [showOutput, setShowOutput] = useState(false)
-  const assessmentRef = useRef(null)
 
   // State for API response and loading/error states
   const [assessment, setAssessment] = useState(null)
@@ -179,25 +177,19 @@ export default function QuizMaker() {
         requestBody.subtopic = selected.subtopic;
       }
 
-      // Make API call to the assessment endpoint
-      const response = await fetch('http://localhost:8000/assessment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      })
+      // Make API call to the assessment endpoint using axios
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/assessment`,
+        requestBody,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
 
-      // Handle response
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(
-          errorData.detail?.message || 'Failed to fetch assessment'
-        )
-      }
-
-      // Inside handleSubmit function
-      const data = await response.json();
+      // Handle success - axios automatically parses JSON and throws for non-2xx status
+      const data = response.data;
       
       // Format the assessment data
       let cleanedAssessment;
@@ -219,7 +211,8 @@ export default function QuizMaker() {
       
       setShowOutput(true);
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred')
+      // Axios error handling
+      setError(err.response?.data?.detail?.message || err.message || 'An unexpected error occurred')
       console.error('Error fetching assessment:', err)
     } finally {
       setIsLoading(false)

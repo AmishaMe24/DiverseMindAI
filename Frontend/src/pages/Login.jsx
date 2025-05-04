@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
+import logo from '../assets/diversemind-logo.jpg'
 
 const Login = () => {
   const navigate = useNavigate()
@@ -87,7 +88,7 @@ const Login = () => {
             <div className="w-full p-8">
               <div className="flex justify-center mb-6">
                 <img
-                  src="https://flowbite.com/docs/images/logo.svg"
+                  src={logo}
                   className="h-10"
                   alt="Company Logo"
                 />
