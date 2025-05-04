@@ -93,7 +93,7 @@ def generate_adaptive_lesson_plan(subject, grade, topic, subtopic, exec_skills):
     elif subject == 'Science':
         lesson_results = lesson_collection.query(
             query_texts=[f"Lesson for {subject} on {topic} for grade {grade}"],  # semantic hint
-            n_results=10,
+            n_results=7,
             where={
                 "$and": [
                     {"grade": grade.strip()},    

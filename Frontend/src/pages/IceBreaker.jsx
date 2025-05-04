@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ChevronDown, Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import Select from 'react-select'
+import IceBreakerOutput from '../components/IceBreakerOutput'
+import dropdownData from '../data/dropdownData.json'
 
 export default function IceBreaker() {
   const [openDropdown, setOpenDropdown] = useState(null)
@@ -12,14 +15,13 @@ export default function IceBreaker() {
   const [downloadInProgress, setDownloadInProgress] = useState(false)
 
   const dropdowns = {
-    disorder: {
-      label: 'Disorder',
-      options: ['Dyslexia', 'Dyscalculia', 'ADHD'],
-    },
     setting: { label: 'Setting', options: ['in person', 'virtual'] },
   }
 
-  const [selected, setSelected] = useState({ disorder: '', setting: '' })
+  const [selected, setSelected] = useState({ 
+    setting: '', 
+    exec_skills: [] 
+  })
   const [activity, setActivityType] = useState('')
   const [materials, setMaterials] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -100,8 +102,81 @@ export default function IceBreaker() {
     setOpenDropdown(null)
   }
 
+  // Handle select change for React-Select component (executive skills)
+  const handleSelectChange = (selectedOption, actionMeta) => {
+    const { name } = actionMeta
+    
+    if (name === 'exec_skills') {
+      // Check if user is trying to select more than 2 executive skills
+      if (selectedOption && selectedOption.length > 2) {
+        // Limit to first 2 selections
+        const limitedOptions = selectedOption.slice(0, 2);
+        
+        // Show a warning message
+        setError('You can select a maximum of 2 executive skills')
+        
+        // Update state with only the first 2 options
+        setSelected(prev => ({
+          ...prev,
+          exec_skills: limitedOptions.map(option => option.value)
+        }))
+        
+        // Return early to prevent processing more than 2 options
+        return;
+      }
+      
+      // Normal processing for 2 or fewer options
+      setSelected(prev => ({
+        ...prev,
+        exec_skills: selectedOption ? selectedOption.map(option => option.value) : []
+      }))
+      
+      // Clear the error message if it was set previously
+      if (error === 'You can select a maximum of 2 executive skills') {
+        setError(null);
+      }
+    }
+  }
+
+  // Custom styles for React Select
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
+      boxShadow: state.isFocused ? '0 0 0 2px #bfdbfe' : 'none',
+      '&:hover': {
+        borderColor: '#3b82f6',
+      },
+      padding: '2px',
+      borderRadius: '0.5rem',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected 
+        ? '#eff6ff' 
+        : state.isFocused 
+          ? '#dbeafe' 
+          : null,
+      color: state.isSelected ? '#2563eb' : '#374151',
+      fontWeight: state.isSelected ? '500' : '400',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#bfdbfe',
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      borderRadius: '0.5rem',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: '#9ca3af',
+    }),
+  }
+
   const handleSubmit = async () => {
-    if (!selected.disorder || !selected.setting) {
+    if (!selected.setting || selected.exec_skills.length === 0) {
       setError('Please fill in all required fields')
       return
     }
@@ -113,10 +188,10 @@ export default function IceBreaker() {
 
     try {
       const requestBody = {
-        disorder: selected.disorder,
         setting: selected.setting,
         activity,
         materials,
+        exec_skills: selected.exec_skills
       }
 
       const response = await fetch(
@@ -349,9 +424,30 @@ export default function IceBreaker() {
         <h1 className="text-4xl font-bold mb-10 text-gray-800 text-center">
           Ice Breaker Activities
         </h1>
+        {/* Custom dropdowns for setting */}
         {Object.entries(dropdowns).map(([name, data]) => (
           <CustomDropdown key={name} name={name} data={data} />
         ))}
+
+        {/* Executive Function Skills Dropdown using React-Select */}
+        <div className="mb-7">
+          <label className="block mb-3 text-sm font-medium text-gray-700">
+            Executive Function Skills
+          </label>
+          <Select
+            name="exec_skills"
+            options={dropdownData.exec_skills}
+            value={dropdownData.exec_skills.filter(option => 
+              selected.exec_skills.includes(option.value)
+            )}
+            onChange={handleSelectChange}
+            placeholder="Select executive skills..."
+            isMulti
+            isClearable
+            isSearchable
+            styles={customStyles}
+          />
+        </div>
 
         <div className="mb-7">
           <label className="block mb-3 text-sm font-medium text-gray-700">
@@ -379,6 +475,13 @@ export default function IceBreaker() {
           />
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+            <p>{error}</p>
+          </div>
+        )}
+
         <button
           onClick={handleSubmit}
           disabled={isLoading}
@@ -392,96 +495,21 @@ export default function IceBreaker() {
           {!isLoading && <span className="text-xl">🚀</span>}
         </button>
 
+        {/* Output section */}
         {showOutput && lessonPlan && (
-          <div className="mt-10 border border-gray-200 rounded-xl shadow-md p-6 bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">
-                Suggested Activity
-              </h2>
-              <div className="flex space-x-2">
-                <button
-                  onClick={handlePrintPDF}
-                  className="flex items-center space-x-1 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300"
-                  disabled={downloadInProgress}
-                >
-                  <Download size={16} />
-                  <span>
-                    {downloadInProgress ? 'Processing...' : 'Download PDF'}
-                  </span>
-                </button>
-                <button
-                  onClick={() => setShowOutput(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-            <div ref={contentRef}>
-              {(() => {
-                const content = extractIcebreakerJson(lessonPlan)
-                return (
-                  <div className="space-y-6 text-gray-800 text-[15px] leading-relaxed">
-                    {content.title && (
-                      <h3 className="text-2xl font-semibold text-blue-700">
-                        {content.title}
-                      </h3>
-                    )}
-                    {content.objective && (
-                      <section>
-                        <h4 className="font-semibold text-lg">Objective</h4>
-                        <p>{content.objective}</p>
-                      </section>
-                    )}
-                    {content.materials && (
-                      <section>
-                        <h4 className="font-semibold text-lg">
-                          Materials Needed
-                        </h4>
-                        <p>{content.materials}</p>
-                      </section>
-                    )}
-                    {content.instructions.length > 0 && (
-                      <section>
-                        <h4 className="font-semibold text-lg">Instructions</h4>
-                        {renderList(content.instructions, true)}
-                      </section>
-                    )}
-                    {content.questions.length > 0 && (
-                      <section>
-                        <h4 className="font-semibold text-lg">
-                          Sample Questions
-                        </h4>
-                        {renderList(content.questions)}
-                      </section>
-                    )}
-                    {content.debrief.length > 0 && (
-                      <section>
-                        <h4 className="font-semibold text-lg">
-                          Debrief / Discussion Points
-                        </h4>
-                        {renderList(content.debrief)}
-                      </section>
-                    )}
-                    {content.tips.length > 0 && (
-                      <section>
-                        <h4 className="font-semibold text-lg">
-                          Tips for Success
-                        </h4>
-                        {renderList(content.tips)}
-                      </section>
-                    )}
-                    {content.variations.length > 0 && (
-                      <section>
-                        <h4 className="font-semibold text-lg">Variations</h4>
-                        {renderList(content.variations)}
-                      </section>
-                    )}
-                  </div>
-                )
-              })()}
-            </div>
-          </div>
+          <IceBreakerOutput 
+            icebreaker={lessonPlan} 
+            selected={{
+              setting: selected.setting,
+              activity: activity,
+              materials: materials,
+              exec_skills: selected.exec_skills
+            }} 
+            dropdowns={{
+              ...dropdowns,
+              exec_skills: { options: dropdownData.exec_skills }
+            }} 
+          />
         )}
       </div>
     </div>
