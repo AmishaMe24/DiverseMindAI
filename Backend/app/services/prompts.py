@@ -61,12 +61,15 @@ science_strategies = """
 def get_prompt(subject, lesson_context, exec_context, exec_skills):
     llm_prompt = {
     'Maths': f"""
-You are a lesson planning assistant for special education teachers. Your task is to generate a complete STEM lesson plan that fully incorporates **all of the lesson content** provided in CONTEXT 1, while also embedding executive function strategies (from CONTEXT 2) and math-specific strategies (from CONTEXT 3).
+        You are a lesson planning assistant for special education teachers. Your task is to generate a complete STEM lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from the selected executive function skills that have been proven to be effective in teaching neurodiverse students {exec_skills}.
+        The lesson plan should be in such a way that the teacher just needs to read out and does not require deeper understanding  of the strategies and skills.
 
-The lesson should be **fully written out like a script** that a teacher can directly read to the class. The teacher should not need to summarize, plan, or infer — just read the output. Use full sentences, clear instructions, and engaging language.
+        Use the academic lesson content provided in `CONTEXT 1` and the executive functioning strategies provided in `CONTEXT 2`. Match the exact structure and tone of the uploaded lesson plans.
+
+        ---
 VERY IMPORTANT: 
-Do NOT omit or shorten any part of the original lesson content. Do not summarize or condense the lesson content. Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
-Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
+Do NOT omit or shorten any part of the original lesson content. Do not summarize or condense the lesson content. Integrate all lesson steps, examples, and explanations from (CONTEXT 1) exactly as provided.
+
 
 CONTEXT 1 (Full Original Lesson Plan):
 {lesson_context}
@@ -133,13 +136,15 @@ CONTEXT 3 (Math-Specific Teaching Strategies):
         """,
 
     'Science': f"""
-You are a lesson planning assistant for special education teachers. Your task is to generate a complete science lesson plan that exactly matches the structure and content of the lesson materials provided in CONTEXT 1.
+        You are a lesson planning assistant for special education teachers. Your task is to generate a complete STEM lesson plan that aligns with the lesson structure provided, while incorporating cognitive strategies from the selected executive function skills that have been proven to be effective in teaching neurodiverse students {exec_skills}.
+        The lesson plan should be in such a way that the teacher just needs to read out and does not require deeper understanding  of the strategies and skills.
 
-This lesson should be **fully written out like a teacher script** — so a teacher can read it directly to students with no additional preparation. Use full sentences and instructional language throughout. Avoid bullet points, summaries, or generalized instructions.
+        Use the academic lesson content provided in `CONTEXT 1` and the executive functioning strategies provided in `CONTEXT 2`. Match the exact structure and tone of the uploaded lesson plans.
 
+        ---
 VERY IMPORTANT: 
-Do NOT omit or shorten any part of the original lesson content. Do not summarize or condense the lesson content. Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
-Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
+DO NOT interpret, summarize, or rephrase the lesson content. Treat it as legal text — copy everything, word-for-word, even if repetitive. If unsure, prefer to include more rather than less. Integrate all lesson steps, examples, and explanations from CONTEXT 1 exactly as provided.
+Integrate all lesson steps, examples, and explanations from (CONTEXT 1) exactly as provided.
 Use the provided executive function strategies (in CONTEXT 2) to embed support for neurodiverse learners.
 
 CONTEXT 1 (Full Original Lesson Plan Content):
