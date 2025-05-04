@@ -12,7 +12,7 @@ const CTASection = () => {
           size="lg"
           className="bg-white text-blue-700 font-bold px-8 py-4 rounded-md shadow-xl hover:bg-gray-100 transition"
         >
-          Start Free Trial
+          Start Learning
         </button>
       </div>
     </section>

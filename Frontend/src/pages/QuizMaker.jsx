@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ChevronDown, Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import Select from 'react-select' // Import React Select
-import { downloadQuizAsPDF } from '../utils/quizMakerPdfGenerator'
+import QuizMakerOutput from '../components/QuizMakerOutput'
 import dropdownData from '../data/dropdownData.json'
 import { formatAssessmentOutput } from '../utils/assessmentFormatter';
 
@@ -10,7 +10,6 @@ import { formatAssessmentOutput } from '../utils/assessmentFormatter';
 export default function QuizMaker() {
   const [showOutput, setShowOutput] = useState(false)
   const assessmentRef = useRef(null)
-  const [isDownloading, setIsDownloading] = useState(false)
 
   // State for API response and loading/error states
   const [assessment, setAssessment] = useState(null)
@@ -103,10 +102,34 @@ export default function QuizMaker() {
     const { name } = actionMeta
     
     if (name === 'exec_skills') {
+      // Check if user is trying to select more than 2 executive skills
+      if (selectedOption && selectedOption.length > 2) {
+        // Limit to first 2 selections
+        const limitedOptions = selectedOption.slice(0, 2);
+        
+        // Show a warning message
+        setError('You can select a maximum of 2 executive skills')
+        
+        // Update state with only the first 2 options
+        setSelected(prev => ({
+          ...prev,
+          exec_skills: limitedOptions.map(option => option.value)
+        }))
+        
+        // Return early to prevent processing more than 2 options
+        return;
+      }
+      
+      // Normal processing for 2 or fewer options
       setSelected(prev => ({
         ...prev,
         exec_skills: selectedOption ? selectedOption.map(option => option.value) : []
       }))
+      
+      // Clear the error message if it was set previously
+      if (error === 'You can select a maximum of 2 executive skills') {
+        setError(null);
+      }
     } else {
       setSelected(prev => ({
         ...prev,
@@ -203,19 +226,6 @@ export default function QuizMaker() {
     }
   }
 
-  // Handle PDF download using the utility function
-  const handleDownloadPDF = () => {
-    // Create a compatible format for the PDF generator
-    const formattedDropdowns = {
-      grade: { options: availableGrades },
-      mainSubject: { options: dropdownData.mainSubjects },
-      topic: { options: availableTopics },
-      subtopic: { options: availableSubtopics },
-      exec_skills: { options: dropdownData.exec_skills }
-    }
-    
-    downloadQuizAsPDF(assessment, selected, formattedDropdowns, setIsDownloading)
-  }
 
   // Custom styles for React Select
   const customStyles = {
@@ -254,64 +264,6 @@ export default function QuizMaker() {
     }),
   }
 
-  // Render assessment from API response
-  const renderAssessment = () => {
-    if (!assessment) return null
-
-    // Format executive skills for display
-    const formatExecSkills = () => {
-      return selected.exec_skills.map(skillValue => {
-        const skill = dropdownData.exec_skills.find(opt => opt.value === skillValue);
-        return skill ? skill.label : skillValue;
-      }).join(', ');
-    };
-
-    return (
-      <div className="space-y-6" ref={assessmentRef}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <h3 className="font-medium text-gray-800 mb-1">Subject</h3>
-            <p className="text-gray-700">{selected.mainSubject}</p>
-          </div>
-          <div>
-            <h3 className="font-medium text-gray-800 mb-1">Grade Level</h3>
-            <p className="text-gray-700">{selected.grade}</p>
-          </div>
-          <div>
-            <h3 className="font-medium text-gray-800 mb-1">Topic</h3>
-            <p className="text-gray-700">{selected.topic}</p>
-          </div>
-          {selected.mainSubject === 'Maths' && (
-            <div>
-              <h3 className="font-medium text-gray-800 mb-1">Sub-Topic</h3>
-              <p className="text-gray-700">{selected.subtopic}</p>
-            </div>
-          )}
-          <div className={selected.mainSubject === 'Science' ? "md:col-span-1" : "md:col-span-2"}>
-            <h3 className="font-medium text-gray-800 mb-1">Executive Function Skills</h3>
-            <p className="text-gray-700">{formatExecSkills()}</p>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="font-medium text-gray-800 mb-1">Assessment Title</h3>
-          <p className="text-gray-700">{assessment.title}</p>
-        </div>
-
-        {/* Display the raw assessment text as markdown */}
-        {assessment.assessment && (
-          <div>
-            <h3 className="font-medium text-gray-800 mb-2">
-              Assessment Questions
-            </h3>
-            <div className="prose prose-sm max-w-none p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <ReactMarkdown>{assessment.assessment}</ReactMarkdown>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
 
   return (
     <div className="p-4 mt-7 flex justify-center">
@@ -438,38 +390,19 @@ export default function QuizMaker() {
           {!isLoading && <span className="text-xl">🚀</span>}
         </button>
 
-        {/* Output Card */}
-        {showOutput && (
-          <div className="mt-10 border border-gray-200 rounded-xl shadow-md p-6 bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">
-                Generated Assessment
-              </h2>
-
-              {/* Download PDF Button */}
-              <button
-                onClick={handleDownloadPDF}
-                disabled={isDownloading || !assessment}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm shadow transition
-                  ${
-                    isDownloading || !assessment
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  }`}
-              >
-                <Download size={16} />
-                {isDownloading ? 'Generating PDF...' : 'Download PDF'}
-              </button>
-            </div>
-
-            {assessment ? (
-              renderAssessment()
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No assessment data available
-              </div>
-            )}
-          </div>
+        {/* Output section */}
+        {showOutput && assessment && (
+          <QuizMakerOutput 
+            assessment={assessment} 
+            selected={selected} 
+            dropdowns={{
+              grade: { options: availableGrades },
+              mainSubject: { options: dropdownData.mainSubjects },
+              topic: { options: availableTopics },
+              subtopic: { options: availableSubtopics },
+              exec_skills: { options: dropdownData.exec_skills }
+            }} 
+          />
         )}
       </div>
     </div>
