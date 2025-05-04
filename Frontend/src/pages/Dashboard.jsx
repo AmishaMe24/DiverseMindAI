@@ -17,7 +17,7 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get("http://localhost:8000/auth/logout", { withCredentials: true });
+      await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, { withCredentials: true });
       localStorage.removeItem("user");
       navigate("/");
     } catch (error) {
