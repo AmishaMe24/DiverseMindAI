@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Backend:/app
+      - ./Backend/.env:/app/.env
+    networks:
+      - webnet
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Frontend/Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - webnet
+    volumes:
+      - ./Frontend/.env:/app/.env
+
+networks:
+  webnet:
